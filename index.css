@@ -223,6 +223,14 @@ a {
   gap: 20px;
 }
 
+.team-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.team-services-grid {
+  margin-top: 32px;
+}
+
 .grid-4 {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
@@ -622,6 +630,10 @@ iframe {
 }
 
 @media (max-width: 900px) {
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+
   .nav {
     display: none;
     position: absolute;
