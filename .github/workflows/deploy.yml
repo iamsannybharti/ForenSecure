@@ -1,0 +1,141 @@
+name: CI/CD — Build in GH Actions → Vercel + EC2
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+# ─────────────────────────────────────────────────────────────────
+# JOB 1  Build frontend in CI  →  Deploy prebuilt output to Vercel
+# ─────────────────────────────────────────────────────────────────
+jobs:
+  deploy-frontend:
+    name: 🌐 Build & Deploy Frontend → Vercel (forensecure.in)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # ── Build inside GH Actions runner ──────────────────────
+      - name: 📦 Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: 🔨 Build (tsc + vite)
+        working-directory: frontend
+        run: npm run build
+        env:
+          VITE_API_URL: https://apiforensecure.forensecure.in
+          NODE_ENV: production
+
+      # ── Pull Vercel project config so --prebuilt knows the project ─
+      - name: 🔗 Vercel Pull (link project)
+        working-directory: frontend
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      # ── Tell Vercel to use our pre-built dist/ ───────────────
+      - name: 📐 Vercel Build (wrap dist as prebuilt output)
+        working-directory: frontend
+        run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: 🚀 Deploy prebuilt output to Vercel (production)
+        working-directory: frontend
+        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+# ─────────────────────────────────────────────────────────────────
+# JOB 2  Build backend in CI  →  SCP dist/ to EC2  →  Restart PM2
+# ─────────────────────────────────────────────────────────────────
+  deploy-backend:
+    name: 🖥️ Build & Deploy Backend → EC2 (apiforensecure.forensecure.in)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      # ── Build TypeScript in GitHub Actions ──────────────────
+      - name: 📦 Install all deps (including devDeps for tsc)
+        working-directory: backend
+        run: npm ci
+
+      - name: 🔨 Compile TypeScript → dist/
+        working-directory: backend
+        run: npm run build
+
+      # ── Write production .env so drizzle migrate can connect ─
+      - name: 📝 Write backend .env
+        run: printf '%s' "${{ secrets.BACKEND_ENV }}" > backend/.env
+
+      # ── Run DB migrations in CI (connects to production DB) ──
+      - name: 🗄️ Run Drizzle migrations
+        working-directory: backend
+        run: npx drizzle-kit migrate
+
+      # ── Prune devDeps before shipping ────────────────────────
+      - name: 🧹 Prune devDependencies
+        working-directory: backend
+        run: npm prune --production
+
+      # ── SCP built artifacts to EC2 ───────────────────────────
+      - name: 📤 Upload dist/ to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          source: "backend/dist/,backend/node_modules/,backend/package.json,backend/ecosystem.config.js,backend/drizzle/"
+          target: /var/www/forensecure
+          strip_components: 0
+
+      # ── Write .env on EC2 + restart PM2 ─────────────────────
+      - name: 🔄 Restart API via PM2 on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            set -e
+            APP_DIR="/var/www/forensecure/backend"
+
+            # Write env file from secret
+            printf '%s' "$BACKEND_ENV" > "$APP_DIR/.env"
+
+            # Restart or start PM2 process
+            if pm2 list | grep -q "forensecure-api"; then
+              pm2 restart forensecure-api --update-env
+            else
+              cd "$APP_DIR"
+              pm2 start ecosystem.config.js --env production
+            fi
+            pm2 save
+
+            echo "✅ Backend live at https://apiforensecure.forensecure.in"
+        env:
+          BACKEND_ENV: ${{ secrets.BACKEND_ENV }}

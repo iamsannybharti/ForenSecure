@@ -1,0 +1,9 @@
+uploads/
+node_modules/
+dist/
+
+# Holds JWT_SECRET, the database URL and SMTP credentials. Never commit it —
+# .env.example documents the shape instead.
+.env
+.env.*
+!.env.example

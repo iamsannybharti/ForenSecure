@@ -1,0 +1,103 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        // ForenSecure neutrals. Off-ramp keys keep existing utilities working.
+        slate: {
+          50:  '#f6f8fa',  55:  '#f6f8fa',
+          100: '#f2f4f7',  105: '#f2f4f7',  150: '#eef1f5',
+          200: '#e7eaf0',  202: '#e7eaf0',  205: '#e7eaf0',  220: '#e7eaf0',  250: '#d9dee7',
+          300: '#c7cdd8',  350: '#aeb6c5',  355: '#aeb6c5',
+          400: '#8891a3',  404: '#8891a3',  405: '#8891a3',  450: '#7b8497',  455: '#7b8497',
+          500: '#697286',  505: '#697286',  550: '#596276',
+          600: '#4c5468',  605: '#4c5468',  650: '#35425d',  655: '#35425d',
+          700: '#1c2a49',  705: '#1c2a49',
+          800: '#131c33',  805: '#131c33',  850: '#0e1526',
+          900: '#0b1120',
+          950: '#080b16',
+        },
+        blue: {
+          50: '#f0faf8', 100: '#dcf5f0', 200: '#b7ebe3', 300: '#7edbd0',
+          400: '#3fc7ba', 500: '#0aac9f', 600: '#049a92', 700: '#026864',
+          800: '#075753', 900: '#0a4542', 950: '#062b29',
+        },
+        amber: {
+          50: '#fffbeb', 100: '#fef3c7', 200: '#fde68a', 300: '#fcd34d',
+          400: '#f6b93b', 500: '#f5a623', 600: '#d98a0b', 700: '#b56708',
+          800: '#924f0e', 900: '#783f10', 950: '#451f03',
+        },
+        // ForenSecure semantic tokens.
+        'primary': '#049a92',
+        'on-primary': '#ffffff',
+        'primary-container': '#dcf5f0',
+        'on-primary-container': '#026864',
+        'primary-fixed': '#dcf5f0',
+        'primary-fixed-dim': '#7edbd0',
+        'on-primary-fixed': '#062b29',
+        'on-primary-fixed-variant': '#026864',
+        'secondary': '#1c2a49',
+        'on-secondary': '#ffffff',
+        'secondary-container': '#eef1f5',
+        'on-secondary-container': '#4c5468',
+        'tertiary': '#0aac9f',
+        'on-tertiary': '#ffffff',
+        'tertiary-container': '#dcf5f0',
+        'on-tertiary-container': '#026864',
+        'on-tertiary-fixed': '#080b16',
+        'on-tertiary-fixed-variant': '#1c2a49',
+        'error': '#ba1a1a',
+        'on-error': '#ffffff',
+        'error-container': '#ffdad6',
+        'on-error-container': '#93000a',
+        'background': '#ffffff',
+        'on-background': '#0a0e1c',
+        'surface': '#ffffff',
+        'on-surface': '#0a0e1c',
+        'surface-variant': '#f2f4f7',
+        'on-surface-variant': '#4c5468',
+        'surface-container-lowest': '#ffffff',
+        'surface-container-low': '#f6f8fa',
+        'surface-container': '#f2f4f7',
+        'surface-container-high': '#eef1f5',
+        'surface-container-highest': '#e7eaf0',
+        'outline': '#8891a3',
+        'outline-variant': '#e7eaf0',
+        // Existing brand-* utilities now resolve to the supplied theme.
+        brand: {
+          deepBlue: '#0b1120',
+          navy: '#1c2a49',
+          hero: '#0b1120',
+          cream: '#f6f8fa',
+          ink: '#0a0e1c',
+          muted: '#8891a3',
+          line: '#e7eaf0',
+          gold: '#f5a623',
+          silver: '#e7eaf0',
+          darkSlate: '#1c2a49',
+          glowCyan: '#0aac9f',
+          glowBlue: '#049a92',
+          darkBg: '#080b16',
+          darkCard: '#0b1120',
+          darkBorder: '#1c2a49'
+        }
+      },
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        serif: ['Plus Jakarta Sans', 'Inter', '-apple-system', 'sans-serif'],
+        display: ['Plus Jakarta Sans', 'Inter', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+      },
+      animation: {
+        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'spin-slow': 'spin 12s linear infinite',
+      }
+    },
+  },
+  plugins: [],
+}

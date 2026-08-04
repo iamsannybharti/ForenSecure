@@ -1,0 +1,1 @@
+ALTER TABLE "courses" ADD COLUMN "practicalLabs" text[] DEFAULT '{}' NOT NULL;

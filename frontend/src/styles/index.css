@@ -1,0 +1,548 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   ForenSecure Design System
+   Shared tokens mirror the supplied teal, ink and navy HTML theme.
+   ============================================================ */
+
+:root {
+  --bg:            #f6f8fa;
+  --surface:       #ffffff;
+  --surface-2:     #f2f4f7;
+  --hero:          #0b1120;
+  --hero-card:     #131c33;
+  --navy:          #049a92;
+  --navy-hover:    #026864;
+  --navy-light:    #dcf5f0;
+  --ink:           #0a0e1c;
+  --text:          #4c5468;
+  --muted:         #697286;
+  --faint:         #8891a3;
+  --accent:        #0aac9f;
+  --gold:          #f5a623;
+  --danger:        #ef4444;
+  --success:       #10b981;
+  --line:          #e7eaf0;
+  --line-2:        #eef1f5;
+  --track:         #e7eaf0;
+  --chip:          #dcf5f0;
+  --serif: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --sans:  "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mono:  "JetBrains Mono", ui-monospace, monospace;
+  --r-sm: 8px;
+  --r:    12px;
+  --r-lg: 18px;
+  --shadow: 0 1px 2px rgba(10,14,28,.04), 0 8px 24px rgba(10,14,28,.08);
+  --shadow-sm: 0 1px 2px rgba(10,14,28,.04), 0 2px 8px rgba(10,14,28,.05);
+  --shadow-lift: 0 2px 6px rgba(10,14,28,.06), 0 20px 48px rgba(10,14,28,.14);
+  --maxw: 1240px;
+
+  /* Focus ring — one token, both themes. */
+  --focus: #049a92;
+  --focus-halo: rgba(4, 154, 146, 0.24);
+
+  /* Motion tokens. Keep durations short; nothing over 600ms. */
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast:   140ms;
+  --dur:        240ms;
+  --dur-slow:   520ms;
+
+  /* Sticky navbar is 4rem; anchors need clearance. */
+  --nav-h: 78px;
+}
+
+:root { --navy-600: var(--navy-hover); }
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html {
+    scroll-behavior: smooth;
+    /* Clears the sticky navbar so in-page anchors don't land under it. */
+    scroll-padding-top: calc(var(--nav-h) + 1.5rem);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* Headings read better when the last line isn't a widow. Progressive —
+     Chrome 114+/Safari 17.4+/Firefox 121+; older browsers just ignore it. */
+  h1, h2, h3, h4 {
+    color: var(--ink);
+    font-family: var(--serif);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  p { text-wrap: pretty; }
+
+  /* Never let media force a horizontal scrollbar on small screens. */
+  img, svg, video, canvas { max-width: 100%; height: auto; }
+
+  /* One visible focus ring for the whole app. :focus-visible keeps it off
+     mouse clicks, so it costs nothing visually but makes keyboard nav work. */
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  /* Drop the UA ring only where ours already replaced it. */
+  a:focus:not(:focus-visible),
+  button:focus:not(:focus-visible) { outline: none; }
+}
+
+/* ---- Live course status dot ---- */
+/* The label always says "Live now" too, so the pulse is decoration, never the message. */
+.live-dot {
+  box-shadow: 0 0 0 0 rgb(220 38 38 / .7);
+  animation: live-pulse 1.8s cubic-bezier(.4, 0, .6, 1) infinite;
+}
+@keyframes live-pulse {
+  50% { box-shadow: 0 0 0 5px rgb(220 38 38 / 0); }
+  100% { box-shadow: 0 0 0 0 rgb(220 38 38 / 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-dot { animation: none; box-shadow: 0 0 0 3px rgb(220 38 38 / .25); }
+}
+
+/* ---- Rich text editor (course builder) ---- */
+.rte-content:empty::before { content: attr(data-placeholder); color: var(--muted); }
+.rte-content h2 { font-size: 1.15em; font-weight: 800; margin: .6em 0 .3em; }
+.rte-content h3 { font-size: 1.05em; font-weight: 700; margin: .5em 0 .25em; }
+.rte-content p { margin: .4em 0; }
+.rte-content ul { list-style: disc; padding-left: 1.4em; margin: .4em 0; }
+.rte-content ol { list-style: decimal; padding-left: 1.4em; margin: .4em 0; }
+.rte-content blockquote { border-left: 3px solid var(--line); padding-left: .8em; margin: .5em 0; color: var(--muted); }
+.rte-content pre { font-family: monospace; background: var(--bg); padding: .5em; border-radius: 6px; margin: .5em 0; white-space: pre-wrap; }
+.rte-content a { color: var(--navy); text-decoration: underline; }
+
+.article-content { color: var(--text); font-size: 1rem; line-height: 1.8; }
+.article-content > * + * { margin-top: 1.25rem; }
+.article-content h2 { font-size: 1.65rem; font-weight: 800; margin-top: 2.25rem; }
+.article-content h3 { font-size: 1.25rem; font-weight: 800; margin-top: 1.75rem; }
+.article-content h4 { font-size: 1.05rem; font-weight: 700; margin-top: 1.5rem; }
+.article-content ul, .article-content ol { padding-left: 1.5rem; }
+.article-content ul { list-style: disc; }
+.article-content ol { list-style: decimal; }
+.article-content li + li { margin-top: .5rem; }
+.article-content blockquote { border-left: 3px solid var(--accent); color: var(--muted); padding-left: 1rem; }
+.article-content code { background: var(--surface-2); border-radius: 5px; font-family: var(--mono); font-size: .9em; padding: .15em .35em; }
+.article-content a { color: var(--navy); text-decoration: underline; }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--navy); }
+
+/* ---- App shell ---- */
+.fs-shell { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow); margin: 22px auto; max-width: var(--maxw); overflow: hidden; }
+
+/* ---- Topbar ---- */
+.fs-topbar { display: flex; align-items: center; gap: 34px; padding: 20px 30px; border-bottom: 1px solid var(--line-2); background: var(--surface); }
+.fs-brand { font-family: var(--serif); font-weight: 700; font-size: 20px; color: var(--ink); letter-spacing: -.01em; flex-shrink: 0; }
+.fs-brand-dot { color: var(--navy); }
+.fs-nav { display: flex; gap: 26px; }
+.fs-nav-link { font-size: 14px; color: var(--muted); font-weight: 500; padding-bottom: 4px; border-bottom: 2px solid transparent; cursor: pointer; transition: color .15s; text-decoration: none; display: inline-block; }
+.fs-nav-link:hover { color: var(--ink); }
+.fs-nav-link.active { color: var(--ink); border-bottom-color: var(--navy); }
+.fs-topbar-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.fs-pill { border: 1px solid var(--line); color: var(--muted); font-size: 12px; padding: 5px 12px; border-radius: 999px; background: var(--surface); }
+.fs-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--navy); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 600; letter-spacing: .03em; flex-shrink: 0; }
+
+/* ---- Page / typography ---- */
+.fs-page { padding: 30px 30px 40px; flex: 1; }
+.fs-eyebrow { font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+.fs-page-title { font-family: var(--serif); font-weight: 700; color: var(--ink); font-size: 34px; margin: 6px 0 0; letter-spacing: -.02em; }
+.fs-page-head { display: flex; align-items: flex-end; justify-content: space-between; }
+.fs-page-date { color: var(--muted); font-size: 13px; }
+.fs-section-title { font-family: var(--serif); font-size: 21px; color: var(--ink); font-weight: 700; margin: 34px 0 14px; }
+.fs-link { color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; }
+.fs-link:hover { text-decoration: underline; }
+
+/* ---- Grid helpers ---- */
+.fs-row { display: flex; gap: 18px; }
+.fs-grid { display: grid; gap: 18px; }
+.fs-g-4 { grid-template-columns: repeat(4, 1fr); }
+.fs-g-3 { grid-template-columns: repeat(3, 1fr); }
+.fs-g-2 { grid-template-columns: repeat(2, 1fr); }
+.fs-split { display: grid; grid-template-columns: 1fr 320px; gap: 22px; }
+.fs-split-wide { display: grid; grid-template-columns: 240px 1fr; gap: 0; }
+
+/* ---- Cards ---- */
+.fs-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px 20px; }
+.fs-stat-label { color: var(--muted); font-size: 13px; }
+.fs-stat-value { font-size: 30px; font-weight: 700; color: var(--ink); margin-top: 8px; letter-spacing: -.01em; }
+.fs-stat-value small { font-size: 15px; color: var(--faint); font-weight: 500; }
+.fs-stat-sub { color: var(--muted); font-size: 12.5px; margin-top: 8px; }
+.fs-card-hero { background: var(--hero); color: #fff; border: none; }
+.fs-card-hero .fs-stat-label { color: #b4c5ff; }
+.fs-card-hero .fs-stat-value { color: #fff; }
+.fs-card-hero .fs-stat-sub { color: #dbe1ff; }
+
+/* ---- Progress track ---- */
+.fs-track { height: 5px; background: var(--track); border-radius: 4px; overflow: hidden; margin-top: 12px; }
+.fs-track > i { display: block; height: 100%; background: var(--navy); border-radius: 4px; transition: width .3s ease; }
+.fs-card-hero .fs-track { background: #38485d; }
+.fs-card-hero .fs-track > i { background: var(--accent); }
+.fs-dots { display: flex; gap: 6px; margin-top: 12px; }
+.fs-dots span { width: 20px; height: 5px; border-radius: 3px; background: var(--navy); }
+.fs-dots span.off { background: var(--track); }
+
+/* ---- Course rows ---- */
+.fs-course-row { display: flex; align-items: center; gap: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px; margin-bottom: 14px; }
+.fs-thumb { width: 84px; height: 60px; border-radius: var(--r-sm); flex: none; background-image: repeating-linear-gradient(45deg, #dde2f8 0 8px, #eceef0 8px 16px); display: grid; place-items: center; color: #737686; font-size: 10px; }
+.fs-thumb.g { background-image: repeating-linear-gradient(45deg,#dbe7de 0 8px,#e6efe8 8px 16px); }
+.fs-thumb.s { background-image: repeating-linear-gradient(45deg,#dbe1ff 0 8px,#eceef0 8px 16px); }
+.fs-thumb.b { background-image: repeating-linear-gradient(45deg,#c3c6d7 0 8px,#e6e8ea 8px 16px); }
+.fs-course-meta { flex: 1; min-width: 0; }
+.fs-course-code { font-size: 11px; letter-spacing: .08em; color: var(--accent); font-weight: 700; text-transform: uppercase; }
+.fs-course-name { font-family: var(--serif); font-size: 17px; color: var(--ink); font-weight: 700; margin: 3px 0; }
+.fs-course-sub { font-size: 13px; color: var(--muted); }
+.fs-course-sub.due { color: var(--danger); font-weight: 600; }
+.fs-course-prog { width: 180px; flex: none; }
+.fs-pcts { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+
+/* ---- Buttons ---- */
+.fs-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 13.5px; font-weight: 600; padding: 10px 20px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease, color var(--dur-fast) ease, box-shadow var(--dur) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+.fs-btn:hover { border-color: var(--faint); box-shadow: var(--shadow-sm); }
+.fs-btn:active { transform: scale(0.97); }
+.fs-btn:disabled, .fs-btn[aria-disabled="true"] { opacity: .55; cursor: not-allowed; transform: none; }
+.fs-btn.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
+.fs-btn.primary:hover { background: var(--navy-600); border-color: var(--navy-600); box-shadow: 0 6px 18px var(--focus-halo); }
+.fs-btn.gold { background: var(--gold); border-color: var(--gold); color: #fff; }
+.fs-btn.sm { padding: 6px 13px; font-size: 12.5px; }
+.fs-btn.block { width: 100%; }
+.fs-btn.ghost { background: transparent; border-color: transparent; }
+
+/* ---- Panel ---- */
+.fs-panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px 20px; }
+.fs-panel h4 { font-family: var(--serif); font-size: 16px; color: var(--ink); margin: 0 0 14px; }
+.fs-up-item { display: flex; gap: 14px; padding: 12px 0; border-top: 1px solid var(--line-2); }
+.fs-up-item:first-of-type { border-top: none; }
+.fs-datechip { width: 44px; flex: none; text-align: center; }
+.fs-datechip-m { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+.fs-datechip-d { font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1; }
+.fs-u-title { font-size: 14px; color: var(--ink); font-weight: 600; }
+.fs-u-sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+/* ---- Cert path stepper ---- */
+.fs-path-item { display: flex; gap: 14px; padding: 10px 0; }
+.fs-path-dot { width: 16px; flex: none; display: flex; flex-direction: column; align-items: center; }
+.fs-path-o { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--faint); background: var(--surface); margin-top: 3px; }
+.fs-path-o.done { background: var(--navy); border-color: var(--navy); }
+.fs-path-o.now { border-color: var(--navy); }
+.fs-path-bar { width: 2px; flex: 1; background: var(--line); margin: 3px 0; }
+.fs-p-title { font-size: 14px; color: var(--ink); font-weight: 600; }
+.fs-p-title.faint { color: var(--faint); font-weight: 500; }
+.fs-p-sub { font-size: 12px; color: var(--muted); }
+
+/* ---- Chips / badges ---- */
+.fs-chip { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--chip); color: var(--accent); }
+.fs-chip.warm { background: #dbe1ff; color: var(--navy-600); }
+.fs-chip.green { background: #E4F0E9; color: #0f6b47; }
+.fs-chip.red { background: #ffdad6; color: #93000a; }
+.fs-chip.grey { background: var(--surface-2); color: var(--muted); }
+/* The status chips carry literal light backgrounds, so they need explicit
+   dark equivalents — the token overrides above can't reach them. */
+.dark .fs-chip.green { background: #06331f; color: #6ee7b7; }
+.dark .fs-chip.red   { background: #450a0a; color: #fca5a5; }
+.dark .fs-chip.warm  { background: #1e3a8a; color: #bfdbfe; }
+
+/* ---- Tables ---- */
+.fs-tbl { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.fs-tbl th { text-align: left; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 12px 16px; background: var(--surface-2); border-bottom: 1px solid var(--line); }
+.fs-tbl td { padding: 13px 16px; border-bottom: 1px solid var(--line-2); font-size: 13.5px; color: var(--text); }
+.fs-tbl tr:last-child td { border-bottom: none; }
+.fs-tbl .t-strong { color: var(--ink); font-weight: 600; }
+/* Narrow screens: let the table scroll inside itself rather than pushing the
+   page wide — body has overflow-x: hidden, so overflow would be clipped and
+   unreachable instead of scrollable. */
+@media (max-width: 640px) {
+  .fs-tbl { display: block; overflow-x: auto; white-space: nowrap; }
+}
+
+/* ---- Forms ---- */
+.fs-field { margin-bottom: 16px; }
+.fs-field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.fs-input, .fs-select, .fs-textarea { width: 100%; border: 1px solid var(--line); background: var(--surface-2); border-radius: var(--r-sm); padding: 10px 12px; font-size: 14px; color: var(--ink); font-family: var(--sans); transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease; }
+.fs-input:hover, .fs-select:hover, .fs-textarea:hover { border-color: var(--faint); }
+.fs-input:focus, .fs-select:focus, .fs-textarea:focus { outline: none; border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px var(--focus-halo); }
+.fs-textarea { min-height: 96px; resize: vertical; }
+
+/* ---- Sidebar ---- */
+.fs-side { padding: 20px 14px; border-right: 1px solid var(--line-2); min-height: 100%; background: var(--surface); }
+.fs-side-grp { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); font-weight: 700; margin: 18px 10px 8px; }
+.fs-side-link { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--r-sm); font-size: 13.5px; color: var(--text); font-weight: 500; margin-bottom: 2px; cursor: pointer; transition: background .12s; text-decoration: none; }
+.fs-side-link:hover { background: var(--surface-2); }
+.fs-side-link.active { background: var(--navy); color: #fff; }
+
+/* ---- Secure viewer ---- */
+.fs-viewer { background: var(--hero); border-radius: var(--r); aspect-ratio: 16/9; display: grid; place-items: center; position: relative; overflow: hidden; }
+.fs-viewer .wm { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; color: rgba(255,255,255,.06); font-size: 26px; font-weight: 700; transform: rotate(-20deg); letter-spacing: .1em; }
+.fs-secure-flags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.fs-secure-flags .f { font-size: 11.5px; color: var(--muted); background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; }
+
+/* ---- Misc ---- */
+.fs-muted { color: var(--muted); }
+.fs-small { font-size: 12.5px; }
+.fs-divider { height: 1px; background: var(--line-2); margin: 22px 0; }
+.fs-footer { text-align: center; color: var(--faint); font-size: 12px; padding: 26px 0; border-top: 1px solid var(--line-2); }
+.heading-display {
+  font-family: var(--serif);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+  color: var(--ink);
+  /* Fluid so inner-page titles scale from phone to desktop without a
+     breakpoint ladder. Defined after @tailwind utilities, so it wins over
+     the text-3xl these headings also carry. */
+  font-size: clamp(1.75rem, 1.25rem + 2vw, 2.75rem);
+}
+
+/* ---- Hero ---- */
+/* Two declarations, not a Tailwind arbitrary value: svh accounts for mobile
+   browser chrome, and the vh line is the fallback for anything that doesn't
+   know svh (Safari < 15.4). Source order does the feature detection. */
+.hero-min-h {
+  min-height: calc(100vh - var(--nav-h));
+  min-height: calc(100svh - var(--nav-h));
+}
+
+/* Slow ambient drift on the hero glow. Purely decorative — the reduced-motion
+   block below stops it, and it animates transform only. */
+@keyframes fs-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(0, -24px, 0) scale(1.06); }
+}
+.hero-glow, .hero-glow-slow {
+  /* These are ~600px elements under blur(64px). Promoting them to their own
+     layer means the blur is rasterised once and only the layer is moved.
+     Without this, WebKit re-rasterises the blur every frame and the hero
+     visibly stutters on Safari. */
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.hero-glow { animation: fs-drift 14s var(--ease-inout) infinite; }
+.hero-glow-slow { animation: fs-drift 20s var(--ease-inout) infinite reverse; }
+
+/* ---- Hero scroll parallax ----
+   Driven by --hero-p (0 → 1, set from JS in Home.tsx as the hero scrolls out).
+   Deliberately not `animation-timeline: scroll()`: that is the no-JS way to do
+   this, but WebKit support is too recent to rely on and Firefox still ships it
+   off by default, so most visitors would get nothing.
+
+   Everything here is transform + opacity, so it composites and never triggers
+   layout. Each layer moves at a different rate — that difference is the depth.
+   The fallback of 0 in every var() matters: if the property is ever missing the
+   whole transform would be invalid and the layer would jump. */
+.hero-layer {
+  /* No will-change here on purpose: the translate3d below already promotes
+     these to their own layer on WebKit, so the hint would only pin a layer
+     permanently for no gain. backface-visibility is the WebKit-specific part —
+     it stops the promoted layer flickering mid-transform on Safari. */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.hero-layer-text {
+  transform: translate3d(0, calc(var(--hero-p, 0) * -72px), 0);
+  opacity: calc(1 - var(--hero-p, 0) * 0.85);
+}
+.hero-layer-card {
+  transform: translate3d(0, calc(var(--hero-p, 0) * -28px), 0)
+             scale(calc(1 - var(--hero-p, 0) * 0.04));
+  opacity: calc(1 - var(--hero-p, 0) * 0.7);
+}
+/* The cue is the first thing that should go once scrolling has started. */
+.hero-layer-cue {
+  opacity: calc(1 - var(--hero-p, 0) * 3);
+}
+
+/* ============================================================
+   Motion system
+   Scroll reveal, page transitions, micro-interactions.
+   Every rule here is opt-in via a class or data attribute, and the
+   whole block is disabled under prefers-reduced-motion at the bottom.
+   ============================================================ */
+
+/* ---- Scroll reveal ----
+   Elements are only hidden once JS has confirmed it can un-hide them
+   (html.reveal-ready). Without JS, or if the observer never runs, the
+   content stays visible instead of being permanently invisible. */
+.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal-ready [data-reveal="left"]  { transform: translate3d(-24px, 0, 0); }
+.reveal-ready [data-reveal="right"] { transform: translate3d(24px, 0, 0); }
+.reveal-ready [data-reveal="fade"]  { transform: none; }
+.reveal-ready [data-reveal="scale"] { transform: translate3d(0, 14px, 0) scale(0.97); }
+
+.reveal-ready [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+  /* Drop the compositor hint once the animation is done so long pages
+     don't hold dozens of promoted layers. */
+  will-change: auto;
+}
+
+/* Children of a stagger container cascade in. Capped at 8 so a long grid
+   never leaves the last card waiting a full second. */
+.reveal-ready [data-reveal-stagger] > * {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out);
+}
+.reveal-ready [data-reveal-stagger].is-visible > * { opacity: 1; transform: none; }
+.reveal-ready [data-reveal-stagger].is-visible > *:nth-child(1) { transition-delay: 0ms; }
+.reveal-ready [data-reveal-stagger].is-visible > *:nth-child(2) { transition-delay: 70ms; }
+.reveal-ready [data-reveal-stagger].is-visible > *:nth-child(3) { transition-delay: 140ms; }
+.reveal-ready [data-reveal-stagger].is-visible > *:nth-child(4) { transition-delay: 210ms; }
+.reveal-ready [data-reveal-stagger].is-visible > *:nth-child(5) { transition-delay: 280ms; }
+.reveal-ready [data-reveal-stagger].is-visible > *:nth-child(6) { transition-delay: 350ms; }
+.reveal-ready [data-reveal-stagger].is-visible > *:nth-child(n+7) { transition-delay: 420ms; }
+
+/* ---- Page transition ----
+   Keyed on pathname in App.tsx, so each route entry replays it. */
+@keyframes fs-page-in {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+.page-enter { animation: fs-page-in 380ms var(--ease-out) both; }
+
+@keyframes fs-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fs-slide-down {
+  from { opacity: 0; transform: translate3d(0, -8px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+.animate-fade-in   { animation: fs-fade-in var(--dur) var(--ease-out) both; }
+.animate-slide-down { animation: fs-slide-down var(--dur) var(--ease-out) both; }
+
+/* ---- Micro-interactions ---- */
+
+/* Press feedback. Applies to every real button for free; links opt in
+   with .press so ordinary inline text links aren't affected. */
+button:not(:disabled), .press {
+  transition: color var(--dur-fast) ease, background-color var(--dur-fast) ease,
+              border-color var(--dur-fast) ease, box-shadow var(--dur) var(--ease-out),
+              opacity var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out);
+}
+button:not(:disabled):active, .press:active { transform: scale(0.97); }
+
+/* Card hover: lift plus a shadow. Transform-and-opacity only, so it stays
+   on the compositor and never triggers layout. */
+.hover-lift { transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out), border-color var(--dur) ease; }
+.hover-lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
+.hover-lift:active { transform: translateY(-1px); }
+
+/* Nudges an icon in the direction of travel on hover of the parent link. */
+.hover-nudge :where(.nudge-x) { transition: transform var(--dur) var(--ease-out); }
+.hover-nudge:hover :where(.nudge-x) { transform: translateX(3px); }
+
+/* Animated underline for text links — grows from the left on hover. */
+.link-underline { position: relative; }
+.link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: -2px;
+  width: 100%; height: 1.5px;
+  background: currentColor;
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur) var(--ease-out);
+}
+.link-underline:hover::after,
+.link-underline:focus-visible::after { transform: scaleX(1); }
+
+/* Accessible skip target — visible only when focused. */
+.skip-link {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -150%);
+  z-index: 100;
+  background: var(--navy);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+  transition: transform var(--dur) var(--ease-out);
+}
+.skip-link:focus { transform: translate(-50%, 0); }
+
+/* ---- Reduced motion ----
+   Honour the OS setting: kill movement, keep state changes legible.
+   Reveal elements must be forced visible here or the content vanishes
+   for anyone who asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Exception: the busy spinner is the only signal that something is
+     loading. Frozen it reads as a stalled app, so it keeps turning —
+     slower, and it's a small steady rotation rather than motion across
+     the screen. */
+  .animate-spin {
+    animation-duration: 1.6s !important;
+    animation-iteration-count: infinite !important;
+  }
+
+  .reveal-ready [data-reveal],
+  .reveal-ready [data-reveal-stagger] > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .hover-lift:hover,
+  .hover-nudge:hover :where(.nudge-x),
+  button:not(:disabled):active,
+  .press:active,
+  .fs-btn:active { transform: none !important; }
+
+  /* Parallax off. JS also stops updating --hero-p, but pin the layers here
+     too so the hero is correct even mid-scroll when the setting changes. */
+  .hero-layer-text,
+  .hero-layer-card,
+  .hero-layer-cue {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .hero-glow, .hero-glow-slow { will-change: auto; }
+
+  .link-underline::after { transition: none; }
+}
+
+/* Certificate print — output only the certificate, in landscape */
+@media print {
+  @page { size: A4 landscape; margin: 8mm; }
+  body * { visibility: hidden; }
+  .cert-print, .cert-print * { visibility: visible; }
+  .cert-print { position: absolute; left: 0; top: 0; width: 100%; }
+}

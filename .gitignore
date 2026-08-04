@@ -1,0 +1,34 @@
+# Runtime & binaries (NEVER commit these)
+.runtime/
+*.exe
+*.pdb
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+frontend/dist/
+backend/dist/
+
+# Environment files (secrets)
+.env
+.env.*
+!.env.example
+cred.md
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.claude/
+.agents/
+
+# Temp
+tmp/
