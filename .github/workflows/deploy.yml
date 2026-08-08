@@ -97,14 +97,11 @@ jobs:
             printf '%s' "$BACKEND_ENV" > "$APP_DIR/.env"
 
             cd "$APP_DIR"
-            if pm2 list | grep -q "forensecure-api"; then
-              pm2 restart forensecure-api --update-env
+            if [ -f ecosystem.config.js ]; then
+              pm2 startOrRestart ecosystem.config.js --env production
             else
-              if [ -f ecosystem.config.js ]; then
-                pm2 start ecosystem.config.js --env production
-              else
-                pm2 start dist/server.js --name forensecure-api
-              fi
+              pm2 delete forensecure-api 2>/dev/null || true
+              pm2 start dist/server.js --name forensecure-api
             fi
             pm2 save
             echo "✅ Backend successfully running on EC2 via PM2!"
