@@ -37,10 +37,16 @@ jobs:
 
       - name: 🚀 Deploy Frontend to Vercel
         working-directory: frontend
-        run: npx vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          ORG="${{ secrets.VERCEL_ORG_ID }}"
+          PRJ="${{ secrets.VERCEL_PROJECT_ID }}"
+          if [ -n "$ORG" ] && [ -n "$PRJ" ]; then
+            echo "Deploying with VERCEL_PROJECT_ID and VERCEL_ORG_ID..."
+            VERCEL_ORG_ID="$ORG" VERCEL_PROJECT_ID="$PRJ" npx vercel --prod --token="${{ secrets.VERCEL_TOKEN }}" --yes
+          else
+            echo "Deploying to Vercel with token..."
+            npx vercel --prod --token="${{ secrets.VERCEL_TOKEN }}" --yes
+          fi
 
 
 
