@@ -21,10 +21,10 @@ export function LogoMark({ className = 'w-9 h-9', style }: { className?: string;
 
 export default function Logo({ className = '', iconOnly = false, size = 'md', variant = 'auto' }: LogoProps) {
   const sizeClasses = {
-    sm: { icon: 'h-7 w-auto', text: 'text-base' },
-    md: { icon: 'h-9 w-auto', text: 'text-xl' },
-    lg: { icon: 'h-11 w-auto', text: 'text-2xl' },
-    xl: { icon: 'h-14 w-auto', text: 'text-3xl' }
+    sm: { icon: 'h-9 w-auto', text: 'text-lg' },
+    md: { icon: 'h-12 w-auto', text: 'text-2xl' },
+    lg: { icon: 'h-14 w-auto', text: 'text-3xl' },
+    xl: { icon: 'h-20 w-auto', text: 'text-4xl' }
   };
 
   const currentSize = sizeClasses[size] || sizeClasses.md;

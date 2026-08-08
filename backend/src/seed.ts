@@ -885,7 +885,7 @@ const seedDatabase = async () => {
     const [adminUser, teacherUser, studentUser] = await db.insert(users).values([
       {
         name: 'Admin Investigator',
-        email: 'imailsanny@gmail.com',
+        email: 'imailforensecure@gmail.com',
         passwordHash,
         role: 'admin' as const,
         enrolledCourses: courseRows.map(c => c.id),

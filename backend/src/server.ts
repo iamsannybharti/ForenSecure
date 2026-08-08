@@ -111,6 +111,12 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
+// Root healthcheck route for domain verification
+app.get('/', (_req: Request, res: Response) => {
+  res.json({ status: 'ok', service: 'ForenSecure API', timestamp: new Date().toISOString() });
+});
+
+
 // Credential endpoints get a far tighter budget than the rest of the API
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -132,7 +138,7 @@ let mockUsers: any[] = [
   {
     id: 'admin_mock_id',
     name: 'Admin Investigator',
-    email: 'imailsanny@gmail.com',
+    email: 'imailforensecure@gmail.com',
     passwordHash: '', // Hash filled on boot
     role: 'admin',
     enrolledCourses: [],
