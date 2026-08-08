@@ -10,8 +10,14 @@ export * from './schema';
 const connectionString =
   process.env.DATABASE_URL || 'postgres://postgres:postgres@127.0.0.1:5432/forensecure';
 
+// Managed Postgres (Render/RDS/etc.) terminates TLS and presents a cert that
+// isn't in the container trust store; enable SSL without hard-failing on that.
+// Local Postgres (localhost/127.0.0.1) speaks plaintext, so SSL stays off there.
+const isLocal = /@(localhost|127\.0\.0\.1)[:/]/.test(connectionString);
+
 export const pool = new Pool({
   connectionString,
+  ssl: isLocal ? undefined : { rejectUnauthorized: false },
   // Fail fast so a missing database stops boot instead of leaving the API hung.
   connectionTimeoutMillis: 5000
 });

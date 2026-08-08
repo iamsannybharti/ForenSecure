@@ -1,0 +1,51 @@
+# Render Blueprint — backend API + managed Postgres for ForenSecure.
+# Deploy: render.com → New → Blueprint → pick this repo. Render reads this file,
+# creates the database and web service, and redeploys on every push to main.
+#
+# Migrations run automatically: the server calls drizzle `migrate()` on boot
+# (see backend/src/db/index.ts), so no separate migrate step is needed.
+databases:
+  - name: forensecure-db
+    plan: free
+    databaseName: forensecure
+    user: forensecure
+
+services:
+  - type: web
+    name: forensecure-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/server.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      # PORT is injected by Render; server reads process.env.PORT.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: forensecure-db
+          property: connectionString
+      # Frontend origin — password-reset / invite links are built from it.
+      - key: APP_URL
+        value: https://www.forensecure.in
+      - key: MAIL_FROM
+        value: ForenSecure <no-reply@forensecure.in>
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      # Secrets — set these in the Render dashboard, never committed.
+      # JWT_SECRET must be >= 32 chars or the server refuses to boot in prod.
+      - key: JWT_SECRET
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
