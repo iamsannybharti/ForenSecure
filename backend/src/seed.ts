@@ -820,6 +820,8 @@ const dropdownOptionsData = [
 // renders every section exactly as mock mode does. Unknown keys drizzle ignores.
 const normalizeCourse = (c: any) => ({
   ...c,
+  startDate: c.startDate ? new Date(c.startDate) : null,
+  endDate: c.endDate ? new Date(c.endDate) : null,
   learningObjectives: c.learningObjectives || c.whatYouWillLearn || c.learningOutcomes || c.programmeOutcomes || [],
   eligibility: c.eligibility || c.targetParticipants || c.whoShouldEnroll || c.whoShouldAttend || [],
   careerBenefits: c.careerBenefits || c.careerOpportunities || [],
@@ -878,8 +880,23 @@ const seedDatabase = async () => {
     }
 
     // Create Courses (alias keys folded into real columns first)
-    const courseRows = await db.insert(courses).values(coursesData.map(normalizeCourse) as any).returning();
-    console.log(`Seed: Inserted ${courseRows.length} courses.`);
+    let courseRows: any[] = [];
+    try {
+      courseRows = await db.insert(courses).values(coursesData.map(normalizeCourse) as any).returning();
+      console.log(`Seed: Inserted ${courseRows.length} courses.`);
+    } catch (courseErr: any) {
+      console.error('Seed Error inserting courses:', courseErr?.message || courseErr, courseErr?.detail || '');
+      // Fallback: insert courses individually if bulk batch encounters constraint issues
+      for (const item of coursesData.map(normalizeCourse)) {
+        try {
+          const inserted = await db.insert(courses).values(item as any).returning();
+          courseRows.push(inserted[0]);
+        } catch (singleErr: any) {
+          console.error(`Seed Warning: Skipping item "${item.title}":`, singleErr?.message || singleErr);
+        }
+      }
+      console.log(`Seed Fallback: Inserted ${courseRows.length} courses individually.`);
+    }
 
     // Match quizzes with courses
     const cyberCourse = courseRows.find(c => c.slug === 'cyber-forensics-incident-response');
