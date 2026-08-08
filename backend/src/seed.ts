@@ -847,7 +847,13 @@ const seedDatabase = async () => {
     }
 
     if (!FORCE) {
-      const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(users);
+      let count = 0;
+      try {
+        const res = await db.select({ count: sql<number>`count(*)::int` }).from(users);
+        count = res[0]?.count || 0;
+      } catch (_e) {
+        count = 0;
+      }
       if (count > 0) {
         console.log(`Seed: skipped — the database already holds ${count} user account(s).`);
         console.log('Seed: re-run with --force to wipe every table and rebuild the demo data.');

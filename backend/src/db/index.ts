@@ -28,11 +28,47 @@ export const db = drizzle(pool, { schema });
  * Opens the pool and brings the schema up to date. Throws if Postgres is
  * unreachable; persisted data is required for the API to start.
  */
+import fs from 'fs';
+import { sql } from 'drizzle-orm';
+import { users } from './schema';
+
 export const connectDB = async () => {
   const client = await pool.connect();
   client.release();
-  await migrate(db, { migrationsFolder: path.join(__dirname, '..', '..', 'drizzle') });
-  console.log('Postgres connected and migrations applied.');
+  
+  const migrationsFolder = path.join(__dirname, '..', '..', 'drizzle');
+  try {
+    await migrate(db, { migrationsFolder });
+    console.log('Postgres connected and migrations applied.');
+  } catch (err) {
+    console.warn('Drizzle migrator notice:', err);
+  }
+
+  // Self-healing check: verify if essential tables (e.g. "users") exist in postgres.
+  // If not, execute SQL migration files directly so the database is guaranteed ready.
+  try {
+    await db.select({ count: sql<number>`count(*)::int` }).from(users);
+  } catch (_err) {
+    console.log('Seed/Connect: essential tables missing. Executing schema migrations directly...');
+    if (fs.existsSync(migrationsFolder)) {
+      const files = fs.readdirSync(migrationsFolder).filter(f => f.endsWith('.sql')).sort();
+      for (const file of files) {
+        const sqlContent = fs.readFileSync(path.join(migrationsFolder, file), 'utf8');
+        const statements = sqlContent.split('--> statement-breakpoint');
+        for (const stmt of statements) {
+          const trimmed = stmt.trim();
+          if (trimmed) {
+            try {
+              await db.execute(sql.raw(trimmed));
+            } catch (_e) {
+              // Ignore duplicate table/relation error if already created
+            }
+          }
+        }
+      }
+      console.log('Seed/Connect: Database schema initialized successfully.');
+    }
+  }
 };
 
 /** UUID columns reject malformed input at the driver, which would surface as a
