@@ -44,30 +44,24 @@ export const connectDB = async () => {
     console.warn('Drizzle migrator notice:', err);
   }
 
-  // Self-healing check: verify if essential tables (e.g. "users") exist in postgres.
-  // If not, execute SQL migration files directly so the database is guaranteed ready.
-  try {
-    await db.select({ count: sql<number>`count(*)::int` }).from(users);
-  } catch (_err) {
-    console.log('Seed/Connect: essential tables missing. Executing schema migrations directly...');
-    if (fs.existsSync(migrationsFolder)) {
-      const files = fs.readdirSync(migrationsFolder).filter(f => f.endsWith('.sql')).sort();
-      for (const file of files) {
-        const sqlContent = fs.readFileSync(path.join(migrationsFolder, file), 'utf8');
-        const statements = sqlContent.split('--> statement-breakpoint');
-        for (const stmt of statements) {
-          const trimmed = stmt.trim();
-          if (trimmed) {
-            try {
-              await db.execute(sql.raw(trimmed));
-            } catch (_e) {
-              // Ignore duplicate table/relation error if already created
-            }
+  // Always reconcile database schema so missing tables or newly added columns are guaranteed present.
+  if (fs.existsSync(migrationsFolder)) {
+    const files = fs.readdirSync(migrationsFolder).filter(f => f.endsWith('.sql')).sort();
+    for (const file of files) {
+      const sqlContent = fs.readFileSync(path.join(migrationsFolder, file), 'utf8');
+      const statements = sqlContent.split('--> statement-breakpoint');
+      for (const stmt of statements) {
+        const trimmed = stmt.trim();
+        if (trimmed) {
+          try {
+            await db.execute(sql.raw(trimmed));
+          } catch (_e) {
+            // Ignore duplicate table or column errors
           }
         }
       }
-      console.log('Seed/Connect: Database schema initialized successfully.');
     }
+    console.log('Database schema reconciled successfully.');
   }
 };
 

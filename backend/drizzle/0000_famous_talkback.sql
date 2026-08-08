@@ -92,6 +92,7 @@ CREATE TABLE "courses" (
 	"learningObjectives" text[] DEFAULT '{}' NOT NULL,
 	"prerequisites" text[] DEFAULT '{}' NOT NULL,
 	"targetAudience" text[] DEFAULT '{}' NOT NULL,
+	"practicalLabs" text[] DEFAULT '{}' NOT NULL,
 	"language" text DEFAULT 'English' NOT NULL,
 	"seeking_mode" text DEFAULT 'free' NOT NULL,
 	"version" integer DEFAULT 1 NOT NULL,
