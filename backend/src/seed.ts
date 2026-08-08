@@ -844,12 +844,16 @@ const seedDatabase = async () => {
     // Clear old data. Truncating together satisfies the foreign keys pointing at
     // courses and users in one statement; CASCADE also empties the dependent
     // tables (notes, notifications, certificates) that reference them.
-    await db.execute(sql`
-      truncate table ${users}, ${courses}, ${quizzes}, ${research}, ${seminars},
-        ${blogs}, ${announcements}, ${learningPaths}, ${dropdownOptions}, ${teamMembers},
-        ${accessMatrix} restart identity cascade
-    `);
-    console.log('Seed: Cleared old tables.');
+    try {
+      await db.execute(sql`
+        truncate table ${users}, ${courses}, ${quizzes}, ${research}, ${seminars},
+          ${blogs}, ${announcements}, ${learningPaths}, ${dropdownOptions}, ${teamMembers},
+          ${accessMatrix} restart identity cascade
+      `);
+      console.log('Seed: Cleared old tables.');
+    } catch (_e) {
+      console.log('Seed: Fresh database detected, proceeding to insert records.');
+    }
 
     // Create Courses (alias keys folded into real columns first)
     const courseRows = await db.insert(courses).values(coursesData.map(normalizeCourse) as any).returning();
