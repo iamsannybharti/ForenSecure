@@ -97,6 +97,14 @@ jobs:
             printf '%s' "$BACKEND_ENV" > "$APP_DIR/.env"
 
             cd "$APP_DIR"
+            
+            # Run DB seed if seed file exists
+            if [ -f dist/seed.js ]; then
+              echo "🌱 Seeding database..."
+              node dist/seed.js || true
+            fi
+
+            # Start or restart PM2 process
             if [ -f ecosystem.config.js ]; then
               pm2 startOrRestart ecosystem.config.js --env production
             else
@@ -107,4 +115,5 @@ jobs:
             echo "✅ Backend successfully running on EC2 via PM2!"
         env:
           BACKEND_ENV: ${{ secrets.BACKEND_ENV }}
+
 
