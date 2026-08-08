@@ -133,8 +133,28 @@ jobs:
             set_default SMTP_PASS ""
             set_default MAIL_FROM "ForenSecure <no-reply@forensecure.in>"
 
-            # Ensure Postgres database 'forensecure' exists
-            sudo -u postgres psql -c "CREATE DATABASE forensecure;" 2>/dev/null || true
+            # The credentials live in .env on the box and are never rewritten here,
+            # but a fresh Postgres install does not know that password, so TCP auth
+            # fails with 28P01. Peer auth as the postgres unix user needs no
+            # password, so use it to align the role and database with .env.
+            DB_URL=$(grep '^DATABASE_URL=' .env | head -1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//')
+            case "$DB_URL" in
+              *://*:*@127.0.0.1*|*://*:*@localhost*)
+                DB_USER=$(printf '%s' "$DB_URL" | sed -E 's#^[a-z]+://([^:@/]+):.*#\1#')
+                DB_PASS=$(printf '%s' "$DB_URL" | sed -E 's#^[a-z]+://[^:@/]+:(.*)@[^@]*$#\1#')
+                DB_NAME=$(printf '%s' "$DB_URL" | sed -E 's#.*/([^/?]+)(\?.*)?$#\1#')
+                echo "🔑 Aligning Postgres role '$DB_USER' / database '$DB_NAME' with .env..."
+                if sudo -u postgres psql -qtAc "SELECT 1 FROM pg_roles WHERE rolname='$DB_USER'" | grep -q 1; then
+                  sudo -u postgres psql -c "ALTER ROLE \"$DB_USER\" WITH LOGIN PASSWORD '$DB_PASS';"
+                else
+                  sudo -u postgres psql -c "CREATE ROLE \"$DB_USER\" WITH LOGIN CREATEDB PASSWORD '$DB_PASS';"
+                fi
+                sudo -u postgres psql -qtAc "SELECT 1 FROM pg_database WHERE datname='$DB_NAME'" | grep -q 1 \
+                  || sudo -u postgres psql -c "CREATE DATABASE \"$DB_NAME\" OWNER \"$DB_USER\";"
+                # PG15+ strips CREATE on public from non-owners; migrations need it.
+                sudo -u postgres psql -d "$DB_NAME" -c "GRANT ALL ON SCHEMA public TO \"$DB_USER\";"
+                ;;
+            esac
 
             # Applies pending migrations, and populates demo data only when the
             # database has no accounts yet. An established database is left alone —
