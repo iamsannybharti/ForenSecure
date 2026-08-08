@@ -892,7 +892,7 @@ const seedDatabase = async () => {
           const inserted = await db.insert(courses).values(item as any).returning();
           courseRows.push(inserted[0]);
         } catch (singleErr: any) {
-          console.error(`Seed Warning: Skipping item "${item.title}":`, singleErr?.message || singleErr);
+          console.error(`Seed Warning: Skipping item "${item.title}":`, singleErr?.message || singleErr, '--> CAUSE:', singleErr?.cause?.message || singleErr?.cause || '');
         }
       }
       console.log(`Seed Fallback: Inserted ${courseRows.length} courses individually.`);
