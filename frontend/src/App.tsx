@@ -2,7 +2,6 @@ import { useEffect, useLayoutEffect, useRef, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import AnnouncementsBanner from './components/AnnouncementsBanner';
 
 // Pages
 import Home from './pages/Home';
@@ -126,7 +125,6 @@ function AppContent() {
       <div className="flex min-h-screen flex-col bg-slate-50 text-slate-600">
         <a href="#main-content" className="skip-link">Skip to main content</a>
         <Navbar />
-        <AnnouncementsBanner />
         <main id="main-content" className="flex-grow">
           <Suspense fallback={
             <div className="flex min-h-[50vh] items-center justify-center bg-slate-50">
