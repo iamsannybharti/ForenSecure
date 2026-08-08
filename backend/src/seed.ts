@@ -885,7 +885,69 @@ const seedDatabase = async () => {
       courseRows = await db.insert(courses).values(coursesData.map(normalizeCourse) as any).returning();
       console.log(`Seed: Inserted ${courseRows.length} courses.`);
     } catch (courseErr: any) {
-      console.error('Seed Error inserting courses:', courseErr?.message || courseErr, courseErr?.detail || '');
+      console.error('Seed Error inserting courses:', courseErr?.message || courseErr, '--> CAUSE:', courseErr?.cause?.message || courseErr?.cause || '');
+      
+      if (String(courseErr?.cause?.message || courseErr?.message).includes('does not exist')) {
+        console.log('Seed Recovery: Ensuring all database tables exist before re-inserting...');
+        await db.execute(sql.raw(`
+          CREATE TABLE IF NOT EXISTS "courses" (
+            "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+            "title" text NOT NULL,
+            "slug" text NOT NULL,
+            "description" text NOT NULL,
+            "category" text NOT NULL,
+            "subcategory" text,
+            "instructor_name" text NOT NULL,
+            "instructor_title" text NOT NULL,
+            "duration_weeks" integer NOT NULL,
+            "course_type" text DEFAULT 'recorded' NOT NULL,
+            "format" text DEFAULT 'course' NOT NULL,
+            "start_date" timestamp with time zone,
+            "end_date" timestamp with time zone,
+            "thumbnail_url" text,
+            "difficulty" text DEFAULT 'Beginner' NOT NULL,
+            "rating" double precision DEFAULT 4.8 NOT NULL,
+            "rating_count" integer DEFAULT 120 NOT NULL,
+            "students_count" integer DEFAULT 1250 NOT NULL,
+            "price_inr" integer NOT NULL,
+            "discount_price_inr" integer,
+            "discount_percentage" integer DEFAULT 0,
+            "approval_status" text DEFAULT 'approved',
+            "syllabus" text[] DEFAULT '{}' NOT NULL,
+            "features" text[] DEFAULT '{}' NOT NULL,
+            "banner_svg_type" text DEFAULT 'fingerprint' NOT NULL,
+            "promo_video_url" text,
+            "visibility" text DEFAULT 'published' NOT NULL,
+            "meta_title" text,
+            "meta_description" text,
+            "learningObjectives" text[] DEFAULT '{}' NOT NULL,
+            "prerequisites" text[] DEFAULT '{}' NOT NULL,
+            "targetAudience" text[] DEFAULT '{}' NOT NULL,
+            "sub_title" text,
+            "overview" text,
+            "level" text,
+            "highlights" text[] DEFAULT '{}' NOT NULL,
+            "eligibility" text[] DEFAULT '{}' NOT NULL,
+            "learningResources" text[] DEFAULT '{}' NOT NULL,
+            "careerBenefits" text[] DEFAULT '{}' NOT NULL,
+            "practicalLabs" text[] DEFAULT '{}' NOT NULL,
+            "assessment_structure" jsonb DEFAULT '[]'::jsonb NOT NULL,
+            "passing_criteria" text,
+            "schedule" jsonb,
+            "language" text DEFAULT 'English' NOT NULL,
+            "seeking_mode" text DEFAULT 'free' NOT NULL,
+            "version" integer DEFAULT 1 NOT NULL,
+            "version_history" jsonb DEFAULT '[]'::jsonb NOT NULL,
+            "course_qna" jsonb DEFAULT '[]'::jsonb NOT NULL,
+            "is_active" boolean DEFAULT true NOT NULL,
+            "target_percentage" integer DEFAULT 60 NOT NULL,
+            "topics" jsonb DEFAULT '[]'::jsonb NOT NULL,
+            "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+            "updated_at" timestamp with time zone DEFAULT now() NOT NULL
+          );
+        `));
+      }
+
       // Fallback: insert courses individually if bulk batch encounters constraint issues
       for (const item of coursesData.map(normalizeCourse)) {
         try {

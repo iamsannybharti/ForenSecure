@@ -1,4 +1,4 @@
-CREATE TABLE "access_matrix" (
+CREATE TABLE IF NOT EXISTS "access_matrix" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"role" text NOT NULL,
 	"feature" text NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE "access_matrix" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "announcements" (
+CREATE TABLE IF NOT EXISTS "announcements" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" text NOT NULL,
 	"body" text NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE "announcements" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "blogs" (
+CREATE TABLE IF NOT EXISTS "blogs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" text NOT NULL,
 	"slug" text NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE "blogs" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "certificates" (
+CREATE TABLE IF NOT EXISTS "certificates" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"certificate_id" text NOT NULL,
 	"student_name" text NOT NULL,
@@ -50,7 +50,7 @@ CREATE TABLE "certificates" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "contacts" (
+CREATE TABLE IF NOT EXISTS "contacts" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
 	"email" text NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE "contacts" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "courses" (
+CREATE TABLE IF NOT EXISTS "courses" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" text NOT NULL,
 	"slug" text NOT NULL,
@@ -115,7 +115,7 @@ CREATE TABLE "courses" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "dropdown_options" (
+CREATE TABLE IF NOT EXISTS "dropdown_options" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"category" text NOT NULL,
 	"label" text NOT NULL,
@@ -125,7 +125,7 @@ CREATE TABLE "dropdown_options" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "learning_paths" (
+CREATE TABLE IF NOT EXISTS "learning_paths" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" text NOT NULL,
 	"slug" text NOT NULL,
@@ -140,7 +140,7 @@ CREATE TABLE "learning_paths" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "notifications" (
+CREATE TABLE IF NOT EXISTS "notifications" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
 	"title" text NOT NULL,
@@ -152,7 +152,7 @@ CREATE TABLE "notifications" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "quizzes" (
+CREATE TABLE IF NOT EXISTS "quizzes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" text NOT NULL,
 	"description" text NOT NULL,
@@ -169,7 +169,7 @@ CREATE TABLE "quizzes" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "research" (
+CREATE TABLE IF NOT EXISTS "research" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" text NOT NULL,
 	"slug" text NOT NULL,
@@ -187,7 +187,7 @@ CREATE TABLE "research" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "seminars" (
+CREATE TABLE IF NOT EXISTS "seminars" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" text NOT NULL,
 	"description" text NOT NULL,
@@ -204,7 +204,7 @@ CREATE TABLE "seminars" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "student_notes" (
+CREATE TABLE IF NOT EXISTS "student_notes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
 	"course_id" uuid NOT NULL,
@@ -217,7 +217,7 @@ CREATE TABLE "student_notes" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "users" (
+CREATE TABLE IF NOT EXISTS "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
 	"email" text NOT NULL,
