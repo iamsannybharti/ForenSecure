@@ -803,11 +803,7 @@ const announcementsData = [
   }
 ];
 
-const teamMembersData = [
-  { name: 'Shri R.K. Sharma', role: 'Former Director, CFSL', description: 'Fingerprint & Document Expert', sortOrder: 0, isActive: true },
-  { name: 'Dr. A. Swaminathan', role: 'Cyber Security Informatics Scientist', description: 'Digital & Incident Response', sortOrder: 1, isActive: true },
-  { name: 'Prof. Meera Deshmukh', role: 'Criminology Research Head', description: 'Crime Scene & Evidence Handling', sortOrder: 2, isActive: true }
-];
+const teamMembersData: any[] = [];
 
 const dropdownOptionsData = [
   { category: 'Course Categories', label: 'Digital Forensics', value: 'Digital Forensics', relatedTo: 'Cyber Defense' },
@@ -830,6 +826,15 @@ const normalizeCourse = (c: any) => ({
   practicalLabs: c.virtualLabs || c.practicalTraining || c.capstoneProjectScenarios || []
 });
 
+/**
+ * Seeding destroys data: it truncates users along with every content table. The
+ * deploy pipeline runs this on every push, so by default it is a no-op once the
+ * database has any account in it — otherwise each release would delete everyone
+ * who had registered since the last one. `--force` (or SEED_FORCE=true) is the
+ * deliberate "wipe and rebuild the demo data" path.
+ */
+const FORCE = process.argv.includes('--force') || process.env.SEED_FORCE === 'true';
+
 const seedDatabase = async () => {
   try {
     try {
@@ -839,6 +844,17 @@ const seedDatabase = async () => {
     } catch (error) {
       console.error('Seed: Postgres is required and could not be reached.', error);
       process.exit(1);
+    }
+
+    if (!FORCE) {
+      const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(users);
+      if (count > 0) {
+        console.log(`Seed: skipped — the database already holds ${count} user account(s).`);
+        console.log('Seed: re-run with --force to wipe every table and rebuild the demo data.');
+        await pool.end();
+        return;
+      }
+      console.log('Seed: empty database detected, populating demo data.');
     }
 
     // Clear old data. Truncating together satisfies the foreign keys pointing at

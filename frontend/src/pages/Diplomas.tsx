@@ -56,6 +56,10 @@ export default function Diplomas() {
         <div className="max-w-6xl mx-auto" data-reveal-stagger>
           
           <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold mb-4">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              All Diplomas Opening Soon (Upcoming Intakes)
+            </div>
             <h1 className="text-3xl font-extrabold tracking-tight heading-display text-brand-deepBlue dark:text-white mb-3">
               Forensic Diploma Programs
             </h1>
@@ -87,13 +91,17 @@ export default function Diplomas() {
 
             {/* Left: diploma list */}
             <div className="lg:col-span-7 space-y-4">
-              <h2 className="text-2xl font-extrabold text-brand-deepBlue dark:text-white heading-display tracking-tight">
-                Professional Diplomas
-              </h2>
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <h2 className="text-2xl font-extrabold text-brand-deepBlue dark:text-white heading-display tracking-tight">
+                  Professional Diplomas
+                </h2>
+                <span className="px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 text-xs font-bold border border-amber-500/30">
+                  Upcoming
+                </span>
+              </div>
 
               {diplomas.length > 0 ? (
                 diplomas.map(diploma => {
-                  const status = courseStatus(diploma);
                   return (
                     <article
                       key={diploma.id || diploma.slug}
@@ -108,7 +116,7 @@ export default function Diplomas() {
                           <h3 className="text-sm font-extrabold text-brand-deepBlue dark:text-white leading-snug">
                             {diploma.title}
                           </h3>
-                          {status !== 'self-paced' && <CourseStatusBadge status={status} />}
+                          <CourseStatusBadge status="upcoming" />
                         </div>
 
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400">
@@ -127,10 +135,10 @@ export default function Diplomas() {
                             ₹{diploma.priceINR?.toLocaleString('en-IN') || '—'}
                           </span>
                           <Link
-                            to={detailsHref(diploma)}
-                            className="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-brand-glowBlue dark:hover:text-brand-glowCyan"
+                            to={`/contact?program=${encodeURIComponent(diploma.slug || diploma.title)}`}
+                            className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline"
                           >
-                            {status === 'upcoming' ? 'Enquire' : 'Details'}
+                            Enquire (Upcoming)
                           </Link>
                         </div>
                       </div>
@@ -204,13 +212,13 @@ export default function Diplomas() {
           </div>
 
           {/* Brochure request card */}
-          <div className="mt-16 p-8 rounded-3xl bg-brand-deepBlue text-white dark:bg-brand-darkCard border border-slate-700/50 dark:border-brand-darkBorder flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="mt-16 p-8 rounded-3xl bg-slate-950 text-white dark:bg-slate-900 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
             <div className="max-w-md">
-              <h3 className="text-lg font-bold heading-display mb-2 flex items-center gap-2 text-white">
+              <h3 className="text-lg font-bold heading-display mb-2 flex items-center gap-2 text-white" style={{ color: '#ffffff' }}>
                 <FileText className="w-5 h-5 text-brand-glowCyan" />
                 Request Program Curriculum brochure
               </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-300 leading-relaxed" style={{ color: '#cbd5e1' }}>
                 Download the detailed syllabus brochure, batch intake capacities, internship details, and physical residency camp locations schedules.
               </p>
             </div>

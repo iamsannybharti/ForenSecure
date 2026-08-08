@@ -96,7 +96,7 @@ export default function CourseBuilder4Panel({ courseForm, setCourseForm, onSave,
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/80 z-50 flex flex-col font-sans">
+    <div className="fixed inset-0 bg-slate-950 z-50 flex flex-col font-sans">
       
       {/* 1. TOP HEADER TOOLBAR */}
       <header className="h-16 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between text-white">

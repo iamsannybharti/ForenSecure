@@ -6,7 +6,7 @@ import { LogoMark } from '../components/Logo';
 import { Key, Mail, User } from 'lucide-react';
 
 export default function Login() {
-  const { login, mfaLogin, register, isAuthenticated } = useAuth();
+  const { login, mfaLogin, register, verifyOtp, resendOtp, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -18,6 +18,11 @@ export default function Login() {
   // Two-factor step: set once password succeeds and the account has MFA enabled.
   const [mfaToken, setMfaToken] = useState<string | null>(null);
   const [mfaCode, setMfaCode] = useState('');
+
+  // Email-code step: every sign-in and sign-up lands here before a session exists.
+  const [otp, setOtp] = useState<{ token: string; email: string; purpose: 'signin' | 'signup' } | null>(null);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpNotice, setOtpNotice] = useState('');
 
   // Forgot-password step: swaps the form for a single email field.
   const [forgotMode, setForgotMode] = useState(false);
@@ -44,6 +49,9 @@ export default function Login() {
         goDest();
       } else if (res.mfaRequired && res.mfaToken) {
         setMfaToken(res.mfaToken);
+      } else if (res.otpRequired && res.otpToken) {
+        setOtp({ token: res.otpToken, email: res.email || form.email, purpose: 'signin' });
+        setOtpNotice(res.message || '');
       } else {
         setErrorMessage(res.message || 'Login failed');
       }
@@ -56,11 +64,52 @@ export default function Login() {
       const res = await register(form.name, form.email, form.password);
       if (res.success) {
         goDest();
+      } else if (res.otpRequired && res.otpToken) {
+        setOtp({ token: res.otpToken, email: res.email || form.email, purpose: 'signup' });
+        setOtpNotice(res.message || '');
       } else {
         setErrorMessage(res.message || 'Registration failed');
       }
     }
     setSubmitting(false);
+  };
+
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setSubmitting(true);
+    const res = await verifyOtp(otp!.token, otpCode.trim());
+    if (res.success) {
+      goDest();
+    } else {
+      setErrorMessage(res.message || 'Verification failed');
+      setOtpCode('');
+    }
+    setSubmitting(false);
+  };
+
+  // A resend replaces the challenge, so the page has to follow the new token —
+  // the code in the older email stops working the moment this succeeds.
+  const handleOtpResend = async () => {
+    setErrorMessage('');
+    setOtpNotice('');
+    setSubmitting(true);
+    const res = await resendOtp(otp!.token);
+    if (res.success && res.otpToken) {
+      setOtp({ ...otp!, token: res.otpToken });
+      setOtpCode('');
+      setOtpNotice(res.message || 'A new code is on its way.');
+    } else {
+      setErrorMessage(res.message || 'Could not send a new code');
+    }
+    setSubmitting(false);
+  };
+
+  const exitOtp = () => {
+    setOtp(null);
+    setOtpCode('');
+    setOtpNotice('');
+    setErrorMessage('');
   };
 
   // The API answers identically whether or not the address is registered, so the
@@ -132,7 +181,7 @@ export default function Login() {
           <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-brand-darkCard border border-slate-200 dark:border-brand-darkBorder shadow-xl space-y-6">
             
             {/* Tab Swappers */}
-            {!mfaToken && (
+            {!mfaToken && !otp && (
             <div className="flex rounded-lg bg-slate-100 dark:bg-brand-darkBg p-1">
               <button
                 onClick={() => { setIsLoginTab(true); setErrorMessage(''); }}
@@ -159,6 +208,58 @@ export default function Login() {
 
             {errorMessage && (
               <p className="text-xs font-medium text-red-500 text-center">{errorMessage}</p>
+            )}
+
+            {otp && (
+              <form onSubmit={handleOtpSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="otp-code" className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Email Verification Code</label>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                    Enter the 6-digit code we sent to <span className="font-semibold text-brand-deepBlue dark:text-white break-all">{otp.email}</span>.
+                  </p>
+                  <input
+                    id="otp-code"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    autoFocus
+                    required
+                    value={otpCode}
+                    onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="123456"
+                    className="w-full h-11 px-3 rounded-lg text-center text-lg tracking-[0.4em] font-bold bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:ring-1 focus:ring-brand-glowCyan focus:outline-none"
+                  />
+                </div>
+
+                {otpNotice && (
+                  <p role="status" className="text-xs font-semibold leading-relaxed text-emerald-600 dark:text-emerald-400">
+                    {otpNotice}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={submitting || otpCode.length < 6}
+                  className="w-full py-2.5 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-brand-deepBlue to-brand-glowBlue hover:from-brand-glowBlue hover:to-brand-glowCyan transition-all duration-300 shadow-md disabled:opacity-50"
+                >
+                  {submitting ? 'Verifying…' : otp.purpose === 'signup' ? 'Verify & Create Account' : 'Verify & Sign In'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleOtpResend}
+                  disabled={submitting}
+                  className="w-full text-xs font-semibold text-slate-400 hover:text-brand-glowCyan disabled:opacity-50"
+                >
+                  Didn't get it? Send a new code
+                </button>
+                <button
+                  type="button"
+                  onClick={exitOtp}
+                  className="w-full text-xs font-semibold text-slate-400 hover:text-brand-glowCyan"
+                >
+                  ← Back to sign in
+                </button>
+              </form>
             )}
 
             {mfaToken && (
@@ -195,7 +296,7 @@ export default function Login() {
               </form>
             )}
 
-            {!mfaToken && forgotMode && (
+            {!mfaToken && !otp && forgotMode && (
               <form onSubmit={handleForgotSubmit} className="space-y-4">
                 <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                   Enter the email address on your account and we'll send you a link to choose a new password.
@@ -239,7 +340,7 @@ export default function Login() {
               </form>
             )}
 
-            {!mfaToken && !forgotMode && (
+            {!mfaToken && !otp && !forgotMode && (
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLoginTab && (
                 <div>

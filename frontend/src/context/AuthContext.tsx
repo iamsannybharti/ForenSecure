@@ -36,14 +36,28 @@ interface UserProfile {
   }[];
 }
 
+/** Password or registration details accepted, but no session yet: the emailed
+ *  code still has to come back through verifyOtp. */
+interface AuthStepResult {
+  success: boolean;
+  message?: string;
+  mfaRequired?: boolean;
+  mfaToken?: string;
+  otpRequired?: boolean;
+  otpToken?: string;
+  email?: string;
+}
+
 interface AuthContextType {
   user: UserProfile | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string; mfaRequired?: boolean; mfaToken?: string }>;
+  login: (email: string, password: string) => Promise<AuthStepResult>;
   mfaLogin: (mfaToken: string, code: string) => Promise<{ success: boolean; message?: string }>;
-  register: (name: string, email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  register: (name: string, email: string, password: string) => Promise<AuthStepResult>;
+  verifyOtp: (otpToken: string, code: string) => Promise<{ success: boolean; message?: string }>;
+  resendOtp: (otpToken: string) => Promise<AuthStepResult>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
 }
@@ -98,6 +112,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (data.mfaRequired) {
           return { success: false, mfaRequired: true, mfaToken: data.mfaToken };
         }
+        if (data.otpRequired) {
+          return { success: false, otpRequired: true, otpToken: data.otpToken, email: data.email, message: data.message };
+        }
         localStorage.setItem('token', data.token);
         setToken(data.token);
         // Profile fetch is triggered by token effect
@@ -142,12 +159,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = await res.json();
 
       if (res.ok) {
+        // The account is not created until the emailed code is confirmed, so
+        // there is no token to store at this point.
+        if (data.otpRequired) {
+          return { success: false, otpRequired: true, otpToken: data.otpToken, email: data.email, message: data.message };
+        }
         localStorage.setItem('token', data.token);
         setToken(data.token);
         return { success: true };
       } else {
         return { success: false, message: data.message || 'Registration failed' };
       }
+    } catch (err) {
+      return { success: false, message: 'Server communication error' };
+    }
+  };
+
+  // Final step of both sign-in and sign-up.
+  const verifyOtp = async (otpToken: string, code: string) => {
+    try {
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otpToken, code })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        setToken(data.token);
+        return { success: true };
+      }
+      return { success: false, message: data.message || 'Verification failed' };
+    } catch (err) {
+      return { success: false, message: 'Server communication error' };
+    }
+  };
+
+  const resendOtp = async (otpToken: string): Promise<AuthStepResult> => {
+    try {
+      const res = await fetch('/api/auth/resend-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otpToken })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        return { success: true, otpToken: data.otpToken, email: data.email, message: data.message };
+      }
+      return { success: false, message: data.message || 'Could not send a new code' };
     } catch (err) {
       return { success: false, message: 'Server communication error' };
     }
@@ -174,6 +233,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login,
     mfaLogin,
     register,
+    verifyOtp,
+    resendOtp,
     logout,
     refreshProfile
   };

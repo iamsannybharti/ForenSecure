@@ -44,6 +44,7 @@ export default function Dashboard() {
   // Navigation State
   const [activeTab, setActiveTab] = useState<'my-courses' | 'builder' | 'seminars' | 'blogs' | 'revenue' | 'grading'>('my-courses');
   const [adminActiveTab, setAdminActiveTab] = useState<'users' | 'invite' | 'matrix' | 'dropdowns'>('users');
+  const [adminPortalMode, setAdminPortalMode] = useState<'system' | 'instructor'>('system');
   
   // Data State
   const [courses, setCourses] = useState<any[]>([]);
@@ -839,8 +840,8 @@ export default function Dashboard() {
 
   if (!user) return null;
 
-  // RENDER ADMIN PORTAL
-  if (user.role === 'admin') {
+  // RENDER ADMIN PORTAL (System Management View)
+  if (user.role === 'admin' && adminPortalMode === 'system') {
     return (
       <>
         <SEO title="System Administrator Dashboard" description="Configure registry security parameters, moderate reviews, and modify instructor/student permission access." canonicalPath="/dashboard" />
@@ -879,40 +880,48 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Navigation Tabs */}
-              <div className="flex gap-1 bg-slate-100 dark:bg-brand-darkBg p-1 rounded-xl w-full sm:w-auto z-10 font-bold text-xs">
+              {/* Mode & Navigation Tabs */}
+              <div className="flex flex-wrap gap-2 items-center z-10">
                 <button
-                  onClick={() => setAdminActiveTab('users')}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    adminActiveTab === 'users' ? 'bg-white dark:bg-brand-darkCard text-slate-800 dark:text-white shadow-sm' : 'text-slate-500'
-                  }`}
+                  onClick={() => setAdminPortalMode('instructor')}
+                  className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-brand-deepBlue to-brand-glowBlue hover:from-brand-glowBlue hover:to-brand-glowCyan text-white text-xs font-bold flex items-center gap-1.5 transition-all duration-300 shadow-sm"
                 >
-                  User Matrix
+                  <BookOpen className="w-3.5 h-3.5 text-brand-glowCyan" /> Instructor Workspace (Courses & Quizzes)
                 </button>
-                <button
-                  onClick={() => setAdminActiveTab('invite')}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    adminActiveTab === 'invite' ? 'bg-white dark:bg-brand-darkCard text-slate-800 dark:text-white shadow-sm' : 'text-slate-500'
-                  }`}
-                >
-                  Invite Staff
-                </button>
-                <button
-                  onClick={() => setAdminActiveTab('matrix')}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    adminActiveTab === 'matrix' ? 'bg-white dark:bg-brand-darkCard text-slate-800 dark:text-white shadow-sm' : 'text-slate-500'
-                  }`}
-                >
-                  Access Matrix
-                </button>
-                <button
-                  onClick={() => setAdminActiveTab('dropdowns')}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    adminActiveTab === 'dropdowns' ? 'bg-white dark:bg-brand-darkCard text-slate-800 dark:text-white shadow-sm' : 'text-slate-500'
-                  }`}
-                >
-                  Dropdowns & Relations
-                </button>
+                <div className="flex gap-1 bg-slate-100 dark:bg-brand-darkBg p-1 rounded-xl w-full sm:w-auto font-bold text-xs">
+                  <button
+                    onClick={() => setAdminActiveTab('users')}
+                    className={`px-3 py-1.5 rounded-lg transition-all ${
+                      adminActiveTab === 'users' ? 'bg-white dark:bg-brand-darkCard text-slate-800 dark:text-white shadow-sm' : 'text-slate-500'
+                    }`}
+                  >
+                    User Matrix
+                  </button>
+                  <button
+                    onClick={() => setAdminActiveTab('invite')}
+                    className={`px-3 py-1.5 rounded-lg transition-all ${
+                      adminActiveTab === 'invite' ? 'bg-white dark:bg-brand-darkCard text-slate-800 dark:text-white shadow-sm' : 'text-slate-500'
+                    }`}
+                  >
+                    Invite Staff
+                  </button>
+                  <button
+                    onClick={() => setAdminActiveTab('matrix')}
+                    className={`px-3 py-1.5 rounded-lg transition-all ${
+                      adminActiveTab === 'matrix' ? 'bg-white dark:bg-brand-darkCard text-slate-800 dark:text-white shadow-sm' : 'text-slate-500'
+                    }`}
+                  >
+                    Access Matrix
+                  </button>
+                  <button
+                    onClick={() => setAdminActiveTab('dropdowns')}
+                    className={`px-3 py-1.5 rounded-lg transition-all ${
+                      adminActiveTab === 'dropdowns' ? 'bg-white dark:bg-brand-darkCard text-slate-800 dark:text-white shadow-sm' : 'text-slate-500'
+                    }`}
+                  >
+                    Dropdowns & Relations
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1339,8 +1348,8 @@ export default function Dashboard() {
     );
   }
 
-  // RENDER TEACHER PORTAL
-  if (user.role === 'teacher' || user.role === 'faculty') {
+  // RENDER TEACHER / INSTRUCTOR PORTAL (Visible to teachers, faculty, and admins in instructor mode)
+  if (user.role === 'teacher' || user.role === 'faculty' || (user.role === 'admin' && adminPortalMode === 'instructor')) {
     return (
       <>
         <SEO title="Instructor Dashboard" description="Configure course modules, schedule live webinars, publish articles, and grade student submissions." canonicalPath="/dashboard" />
@@ -1371,47 +1380,59 @@ export default function Dashboard() {
               <div className="absolute inset-0 digital-grid opacity-10 pointer-events-none"></div>
               <div className="flex items-center gap-4 z-10">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-deepBlue to-brand-glowBlue text-white flex items-center justify-center font-bold text-lg shadow-md">
-                  T
+                  {user.role === 'admin' ? 'A' : 'T'}
                 </div>
                 <div>
-                  <span className="text-[10px] text-brand-glowCyan font-bold uppercase tracking-widest block">Authorized Instructor</span>
+                  <span className="text-[10px] text-brand-glowCyan font-bold uppercase tracking-widest block">
+                    {user.role === 'admin' ? 'Authorized System Admin & Instructor' : 'Authorized Instructor'}
+                  </span>
                   <h1 className="text-xl font-extrabold text-brand-deepBlue dark:text-white heading-display leading-tight mt-0.5">{user.name}</h1>
                 </div>
               </div>
 
               {/* Navigation Tabs */}
-              <div className="flex flex-wrap gap-1 bg-slate-100 dark:bg-brand-darkBg p-1 rounded-xl w-full sm:w-auto z-10">
-                {[
-                  { id: 'my-courses', label: 'Programs' },
-                  { id: 'builder', label: 'Course Builder' },
-                  { id: 'seminars', label: 'Live Calendar' },
-                  { id: 'blogs', label: 'Blogs' },
-                  { id: 'revenue', label: 'Revenue' }
-                ].map(tab => (
+              <div className="flex flex-wrap gap-2 items-center z-10">
+                {user.role === 'admin' && (
                   <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      activeTab === tab.id
-                        ? 'bg-white dark:bg-brand-darkCard text-brand-deepBlue dark:text-white shadow-sm'
-                        : 'text-slate-505 hover:text-slate-800'
-                    }`}
+                    onClick={() => setAdminPortalMode('system')}
+                    className="px-3 py-1.5 bg-red-650 hover:bg-red-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
                   >
-                    {tab.label}
-                  </button>
-                ))}
-                {selectedCourse && (
-                  <button
-                    onClick={() => setActiveTab('grading')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      activeTab === 'grading'
-                        ? 'bg-white dark:bg-brand-darkCard text-brand-deepBlue dark:text-white shadow-sm'
-                        : 'text-slate-505 hover:text-slate-800'
-                    }`}
-                  >
-                    Grading Portal
+                    <Shield className="w-3.5 h-3.5" /> Return to System Admin
                   </button>
                 )}
+                <div className="flex flex-wrap gap-1 bg-slate-100 dark:bg-brand-darkBg p-1 rounded-xl w-full sm:w-auto">
+                  {[
+                    { id: 'my-courses', label: 'Programs' },
+                    { id: 'builder', label: 'Course Builder' },
+                    { id: 'seminars', label: 'Live Calendar' },
+                    { id: 'blogs', label: 'Blogs' },
+                    { id: 'revenue', label: 'Revenue' }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id as any)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        activeTab === tab.id
+                          ? 'bg-white dark:bg-brand-darkCard text-brand-deepBlue dark:text-white shadow-sm'
+                          : 'text-slate-505 hover:text-slate-800'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                  {selectedCourse && (
+                    <button
+                      onClick={() => setActiveTab('grading')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        activeTab === 'grading'
+                          ? 'bg-white dark:bg-brand-darkCard text-brand-deepBlue dark:text-white shadow-sm'
+                          : 'text-slate-505 hover:text-slate-800'
+                      }`}
+                    >
+                      Grading Portal
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 

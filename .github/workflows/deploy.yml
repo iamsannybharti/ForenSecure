@@ -38,6 +38,10 @@ jobs:
       - name: 🚀 Deploy Frontend to Vercel
         working-directory: frontend
         run: npx vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
 
 
   # ─────────────────────────────────────────────────────────────────
@@ -92,17 +96,42 @@ jobs:
             set -e
             APP_DIR="/home/ubuntu/forensecure/backend"
             mkdir -p "$APP_DIR"
-
-            # Write .env from GitHub Secret
-            printf '%s' "$BACKEND_ENV" > "$APP_DIR/.env"
-
             cd "$APP_DIR"
-            
-            # Run DB seed if seed file exists
-            if [ -f dist/seed.js ]; then
-              echo "🌱 Seeding database..."
-              node dist/seed.js || true
-            fi
+            touch .env
+            chmod 600 .env
+
+            # Adds a key only when .env does not already define it. Values edited
+            # on the box — the database password above all — must survive a deploy,
+            # so nothing here ever rewrites a line that is already there.
+            set_default() {
+              grep -q "^$1=" .env || { echo "$1=$2" >> .env; echo "   + added $1"; }
+            }
+
+            echo "📝 Reconciling .env (existing values are left untouched)..."
+            set_default PORT 5000
+            set_default NODE_ENV production
+            set_default DATABASE_URL "postgres://postgres:postgres@127.0.0.1:5432/forensecure"
+            # Generated once and then persisted: a secret committed to the repo would
+            # let anyone mint an admin session token.
+            set_default JWT_SECRET "$(openssl rand -hex 32)"
+            set_default APP_URL https://forensecure.in
+            # Sign-in and sign-up both send a one-time code, so outbound mail is
+            # required for anyone to log in. Fill these in on the box.
+            set_default SMTP_HOST ""
+            set_default SMTP_PORT 587
+            set_default SMTP_SECURE false
+            set_default SMTP_USER ""
+            set_default SMTP_PASS ""
+            set_default MAIL_FROM "ForenSecure <no-reply@forensecure.in>"
+
+            # Ensure Postgres database 'forensecure' exists
+            sudo -u postgres psql -c "CREATE DATABASE forensecure;" 2>/dev/null || true
+
+            # Applies pending migrations, and populates demo data only when the
+            # database has no accounts yet. An established database is left alone —
+            # seeding truncates every table, registrations included.
+            echo "🌱 Applying migrations and seeding an empty database..."
+            node dist/seed.js
 
             # Start or restart PM2 process
             if [ -f ecosystem.config.js ]; then
@@ -112,8 +141,29 @@ jobs:
               pm2 start dist/server.js --name forensecure-api
             fi
             pm2 save
-            echo "✅ Backend successfully running on EC2 via PM2!"
-        env:
-          BACKEND_ENV: ${{ secrets.BACKEND_ENV }}
+
+            # The API is only "deployed" once it answers. Without this the job goes
+            # green on a process that crashed on boot.
+            echo "🩺 Waiting for the API to answer..."
+            for i in $(seq 1 15); do
+              if curl -fsS "http://127.0.0.1:$(grep '^PORT=' .env | cut -d= -f2)/api/health" > /dev/null; then
+                echo "✅ Backend healthy and running on EC2 via PM2!"
+                break
+              fi
+              if [ "$i" = "15" ]; then
+                echo "❌ API did not become healthy. Last 40 log lines:"
+                pm2 logs forensecure-api --lines 40 --nostream || true
+                exit 1
+              fi
+              sleep 2
+            done
+
+            if ! grep -q '^SMTP_HOST=.\+' .env; then
+              echo ""
+              echo "⚠️  SMTP_HOST is empty. Sign-in and sign-up codes will NOT be emailed —"
+              echo "⚠️  they are only written to 'pm2 logs forensecure-api'. Set the SMTP_*"
+              echo "⚠️  values in $APP_DIR/.env and run 'pm2 restart forensecure-api'."
+            fi
+
 
 

@@ -103,60 +103,81 @@ export default function Home() {
       <FsIconSprite />
 
       {/* ============ HERO ============ */}
-      <section
-        className="w-full min-h-[85vh] lg:min-h-[90vh] relative bg-cover bg-center sm:bg-right bg-no-repeat flex items-center border-b border-slate-800/80 overflow-hidden text-white"
-        style={{ backgroundImage: `url('/hero-visual.png')` }}
-      >
-        {/* Dark Left Gradient Backdrop Overlay for 100% crisp legibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#030712] via-[#030712]/90 md:via-[#030712]/80 via-60% to-transparent pointer-events-none" />
+      <section className="w-full min-h-[85vh] lg:min-h-[92vh] relative bg-[#030712] flex items-center border-b border-slate-800/80 overflow-hidden text-white py-12 sm:py-16 lg:py-0">
+        {/* Subtle background ambient glows */}
+        <div className="absolute top-1/4 left-10 w-96 h-96 bg-[#00f0ff]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-16 sm:py-24">
-          <div className="max-w-2xl space-y-6">
+        {/* Right Visual Image - 100% Edge to Edge on Right Side */}
+        <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-1/2 z-0 overflow-hidden pointer-events-none">
+          <img
+            src="/hero-visual.png"
+            alt="Forensic Science Laboratory"
+            className="w-full h-full object-cover object-center [mask-image:linear-gradient(to_right,transparent_0%,black_20%,black_100%)]"
+          />
+        </div>
 
-            {/* Top Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00f0ff]/15 border border-[#00f0ff]/40 text-[#00f0ff] text-xs font-extrabold tracking-wide backdrop-blur-sm">
-              <span>🚀</span> Building the Future of Forensics
-            </div>
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            {/* Left Content Column */}
+            <div className="lg:col-span-6 space-y-6 lg:py-24">
 
-            {/* Branding Header */}
-            <div className="flex items-center gap-3 pt-1">
-              <LogoMark className="w-14 h-14 text-[#00f0ff] shrink-0 drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]" />
-              <div>
-                <span className="text-3xl font-black tracking-tight text-white heading-display block" style={{ color: '#ffffff' }}>
-                  Foren<span className="text-[#00f0ff]" style={{ color: '#00f0ff' }}>Secure</span>
-                </span>
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-[#00f0ff] block" style={{ color: '#00f0ff' }}>
-                  FORENSIC EDUCATION REIMAGINED
-                </span>
+              {/* Top Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00f0ff]/15 border border-[#00f0ff]/40 text-[#00f0ff] text-xs font-extrabold tracking-wide backdrop-blur-sm">
+                <span>🚀</span> Building the Future of Forensics
               </div>
+
+              {/* Branding Header */}
+              <div className="flex items-center gap-4 sm:gap-5 pt-1">
+                <LogoMark className="w-20 h-20 sm:w-24 sm:h-24 text-[#00f0ff] shrink-0 drop-shadow-[0_0_12px_rgba(0,240,255,0.5)]" />
+                <div>
+                  <span className="text-4xl sm:text-5xl font-black tracking-tight text-white heading-display block leading-tight" style={{ color: '#ffffff' }}>
+                    Foren<span className="text-[#00f0ff]" style={{ color: '#00f0ff' }}>Secure</span>
+                  </span>
+                  <span className="text-xs sm:text-sm font-extrabold uppercase tracking-[0.25em] sm:tracking-[0.3em] text-[#00f0ff] block mt-1" style={{ color: '#00f0ff' }}>
+                    FORENSIC EDUCATION REIMAGINED
+                  </span>
+                </div>
+              </div>
+
+              {/* Tagline / Main Headline */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black heading-display tracking-tight text-white leading-[1.15]" style={{ color: '#ffffff' }}>
+                Empowering the Next Generation of <span className="text-[#00f0ff]" style={{ color: '#00f0ff' }}>Forensics</span>
+              </h1>
+
+              {/* Description */}
+              <p className="text-sm sm:text-base text-slate-200 max-w-xl leading-relaxed font-normal" style={{ color: '#e2e8f0' }}>
+                Master the future of forensics with industry-aligned programs, real-world case simulations, and cutting-edge AI tools.
+              </p>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap items-center gap-4 pt-2">
+                <Link
+                  to="/courses"
+                  className="px-8 py-4 rounded-full bg-[#00f0ff] hover:bg-cyan-300 text-slate-950 font-extrabold text-xs sm:text-sm tracking-wider uppercase flex items-center gap-2 shadow-xl shadow-cyan-500/30 transition-all hover:scale-105"
+                  style={{ backgroundColor: '#00f0ff', color: '#030712' }}
+                >
+                  EXPLORE PROGRAMS <Icon id="i-arrow" className="w-4 h-4" />
+                </Link>
+                <Link
+                  to="/quiz"
+                  className="px-8 py-4 rounded-full border-2 border-[#00f0ff] text-[#00f0ff] hover:bg-[#00f0ff]/10 font-extrabold text-xs sm:text-sm tracking-wider uppercase transition-all hover:scale-105"
+                  style={{ borderColor: '#00f0ff', color: '#00f0ff' }}
+                >
+                  DISCOVER MORE
+                </Link>
+              </div>
+
             </div>
 
-            {/* Tagline / Main Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black heading-display tracking-tight text-white leading-[1.15]" style={{ color: '#ffffff' }}>
-              Empowering the Next Generation of <span className="text-[#00f0ff]" style={{ color: '#00f0ff' }}>Forensics</span>
-            </h1>
-
-            {/* Description */}
-            <p className="text-sm sm:text-base text-slate-200 max-w-lg leading-relaxed font-normal" style={{ color: '#e2e8f0' }}>
-              Master the future of forensics with industry-aligned programs, real-world case simulations, and cutting-edge AI tools.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4 pt-4">
-              <Link
-                to="/courses"
-                className="px-8 py-4 rounded-full bg-[#00f0ff] hover:bg-cyan-300 text-slate-950 font-extrabold text-xs sm:text-sm tracking-wider uppercase flex items-center gap-2 shadow-xl shadow-cyan-500/30 transition-all hover:scale-105"
-                style={{ backgroundColor: '#00f0ff', color: '#030712' }}
-              >
-                EXPLORE PROGRAMS <Icon id="i-arrow" className="w-4 h-4" />
-              </Link>
-              <Link
-                to="/quiz"
-                className="px-8 py-4 rounded-full border-2 border-[#00f0ff] text-[#00f0ff] hover:bg-[#00f0ff]/10 font-extrabold text-xs sm:text-sm tracking-wider uppercase transition-all hover:scale-105"
-                style={{ borderColor: '#00f0ff', color: '#00f0ff' }}
-              >
-                DISCOVER MORE
-              </Link>
+            {/* Mobile / Tablet Visual Image Fallback */}
+            <div className="lg:hidden block w-full relative pt-4">
+              <img
+                src="/hero-visual.png"
+                alt="Forensic Science Laboratory"
+                className="w-full h-[350px] sm:h-[450px] object-cover rounded-2xl [mask-image:radial-gradient(ellipse_at_center,_black_70%,_transparent_100%)]"
+              />
             </div>
 
           </div>
@@ -200,6 +221,7 @@ export default function Home() {
               <Link to="/courses" className="btn--text">Explore Courses <Icon id="i-arrow" /></Link>
             </div>
             <div className="eco-card">
+              <span className="badge badge--soon badge--pill eco-card__badge">Upcoming</span>
               <div className="eco-card__icon"><Icon id="i-cap" /></div>
               <h3>Diploma Programs</h3>
               <p>Career-oriented diploma programs with live training and placement support.</p>
@@ -273,8 +295,8 @@ export default function Home() {
       <section className="section section--alt" id="diploma">
         <div className="container">
           <div className="section-header section-header--split">
-            <div><div className="eyebrow">Diploma Programs</div></div>
-            <Link to="/diplomas" className="btn btn--outline btn--sm">View All Diplomas <Icon id="i-arrow" /></Link>
+            <div><div className="eyebrow flex items-center gap-2">Diploma Programs <span className="badge badge--soon badge--pill text-[10px] py-0.5 px-2 font-bold uppercase">Upcoming</span></div></div>
+            <Link to="/diplomas" className="btn btn--outline btn--sm flex items-center gap-2">View All Diplomas <span className="badge badge--soon badge--pill text-[10px] py-0.5 px-2 font-bold uppercase">Upcoming</span> <Icon id="i-arrow" /></Link>
           </div>
           <div className="diploma__grid">
             {diplomas.map((diploma, index) => {
@@ -283,6 +305,7 @@ export default function Home() {
               return (
                 <article className="diploma-card" key={diploma.slug || index}>
                   <div className={`diploma-card__media ${DIPLOMA_MEDIA[index % DIPLOMA_MEDIA.length]}`}>
+                    <span className="badge badge--soon badge--pill absolute top-3 right-3 z-10">Upcoming</span>
                     <Icon id={DIPLOMA_ICONS[index % DIPLOMA_ICONS.length]} />
                   </div>
                   <div className="diploma-card__body">

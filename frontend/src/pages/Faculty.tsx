@@ -33,32 +33,40 @@ export default function Faculty() {
           </div>
 
           <div className="space-y-8">
-            {members.map(m => (
-              <div 
-                key={m.id}
-                className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-brand-darkCard border border-slate-200 dark:border-brand-darkBorder shadow-sm flex flex-col md:flex-row gap-6 items-start"
-              >
-                {/* Faculty placeholder avatar with icon */}
-                <div className="flex-shrink-0 w-24 h-24 rounded-2xl bg-gradient-to-tr from-brand-deepBlue to-brand-glowBlue text-white flex items-center justify-center">
-                  <User className="w-12 h-12" />
-                </div>
-
-                {/* Faculty profile details */}
-                <div className="flex-grow space-y-4">
-                  <div>
-                    <h2 className="text-lg font-bold text-brand-deepBlue dark:text-white leading-tight">
-                      {m.name}
-                    </h2>
-                    <span className="text-xs text-slate-400 block mt-0.5 font-medium">{m.role}</span>
+            {members.length > 0 ? (
+              members.map(m => (
+                <div 
+                  key={m.id}
+                  className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-brand-darkCard border border-slate-200 dark:border-brand-darkBorder shadow-sm flex flex-col md:flex-row gap-6 items-start"
+                >
+                  {/* Faculty placeholder avatar with icon */}
+                  <div className="flex-shrink-0 w-24 h-24 rounded-2xl bg-gradient-to-tr from-brand-deepBlue to-brand-glowBlue text-white flex items-center justify-center">
+                    <User className="w-12 h-12" />
                   </div>
 
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    {m.description}
-                  </p>
-                </div>
+                  {/* Faculty profile details */}
+                  <div className="flex-grow space-y-4">
+                    <div>
+                      <h2 className="text-lg font-bold text-brand-deepBlue dark:text-white leading-tight">
+                        {m.name}
+                      </h2>
+                      <span className="text-xs text-slate-400 block mt-0.5 font-medium">{m.role}</span>
+                    </div>
 
+                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                      {m.description}
+                    </p>
+                  </div>
+
+                </div>
+              ))
+            ) : (
+              <div className="p-12 rounded-3xl bg-white dark:bg-brand-darkCard border border-slate-200 dark:border-brand-darkBorder text-center">
+                <User className="w-10 h-10 text-slate-400 mx-auto mb-3" aria-hidden="true" />
+                <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">Faculty directory updates in progress.</p>
+                <p className="text-xs text-slate-400 mt-1">Check back soon for updated mentor profiles.</p>
               </div>
-            ))}
+            )}
           </div>
 
         </div>

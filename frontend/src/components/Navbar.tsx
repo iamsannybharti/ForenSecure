@@ -10,7 +10,6 @@ const NAV_LINKS = [
   { to: '/', label: 'Home' },
   { to: '/courses', label: 'Courses' },
   { to: '/quiz', label: 'Quiz' },
-  { to: '/diplomas', label: 'Diploma' },
   { to: '/seminars', label: 'Live Classes' },
   { to: '/blogs', label: 'Research' },
   // { to: '/services', label: 'Services (Coming Soon)' },

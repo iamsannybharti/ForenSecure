@@ -305,7 +305,7 @@
   font-weight: 800;
   letter-spacing: -0.025em;
   line-height: 1.12;
-  color: var(--ink);
+  color: inherit;
   /* Fluid so inner-page titles scale from phone to desktop without a
      breakpoint ladder. Defined after @tailwind utilities, so it wins over
      the text-3xl these headings also carry. */

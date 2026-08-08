@@ -315,7 +315,135 @@ export default function Seminars() {
             </div>
           </div>
 
-          {loading ? (
+          {showModal ? (
+            <div className="bg-white dark:bg-brand-darkCard border border-slate-200 dark:border-brand-darkBorder rounded-3xl p-6 sm:p-8 w-full shadow-sm relative space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-brand-darkBorder pb-4">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-brand-glowCyan"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back to Live Classes
+                </button>
+                <h2 className="text-base font-extrabold text-brand-deepBlue dark:text-white flex items-center gap-2">
+                  <Video className="w-5 h-5 text-brand-glowCyan" />
+                  {editingId ? 'Edit Live Class Link & Details' : 'Schedule New Live Class'}
+                </h2>
+              </div>
+
+              <p className="text-xs text-slate-500">
+                Provide your Google Meet, Microsoft Teams, or Zoom link for students to join.
+              </p>
+
+              <form onSubmit={handleSaveSeminar} className="space-y-4 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Class Title</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Memory Forensics Live Case Study Analysis"
+                    value={formData.title}
+                    onChange={e => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Join Meeting URL (Google Meet / Teams / Zoom / Webex)
+                  </label>
+                  <div className="relative">
+                    <LinkIcon className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <input
+                      type="url"
+                      required
+                      placeholder="https://meet.google.com/abc-defg-hij or https://teams.microsoft.com/..."
+                      value={formData.link}
+                      onChange={e => setFormData({ ...formData, link: e.target.value })}
+                      className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Date & Time</label>
+                    <input
+                      type="datetime-local"
+                      required
+                      value={formData.date}
+                      onChange={e => setFormData({ ...formData, date: e.target.value })}
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Duration (Minutes)</label>
+                    <input
+                      type="number"
+                      required
+                      min={15}
+                      max={240}
+                      value={formData.durationMinutes}
+                      onChange={e => setFormData({ ...formData, durationMinutes: Number(e.target.value) })}
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Instructor Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.instructorName}
+                      onChange={e => setFormData({ ...formData, instructorName: e.target.value })}
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Max Participant Seats</label>
+                    <input
+                      type="number"
+                      required
+                      min={10}
+                      value={formData.maxParticipants}
+                      onChange={e => setFormData({ ...formData, maxParticipants: Number(e.target.value) })}
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Session Description / Topic</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Outline what evidence artifacts or tools will be covered live."
+                    value={formData.description}
+                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none resize-none"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-brand-darkBorder">
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-brand-darkBg text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="px-5 py-2 rounded-xl bg-brand-deepBlue text-white dark:bg-brand-glowBlue font-bold hover:bg-brand-glowCyan transition-colors disabled:opacity-50"
+                  >
+                    {saving ? 'Saving...' : editingId ? 'Update Meeting Link' : 'Schedule Class'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : loading ? (
             <div className="text-center py-12">
               <div className="w-8 h-8 border-2 border-brand-glowCyan border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
               <span className="text-xs text-slate-400">Loading scheduled live classes...</span>
@@ -598,138 +726,6 @@ export default function Seminars() {
 
         </div>
       </div>
-
-      {/* Teacher Modal for Scheduling / Editing Live Class */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-brand-darkCard border border-slate-200 dark:border-brand-darkBorder rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl relative space-y-5 animate-in fade-in zoom-in-95">
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-5 right-5 p-1 rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-brand-darkBg"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div>
-              <h2 className="text-lg font-bold text-brand-deepBlue dark:text-white flex items-center gap-2">
-                <Video className="w-5 h-5 text-brand-glowCyan" />
-                {editingId ? 'Edit Live Class Link & Details' : 'Schedule New Live Class'}
-              </h2>
-              <p className="text-xs text-slate-500 mt-1">
-                Provide your Google Meet, Microsoft Teams, or Zoom link for students to join.
-              </p>
-            </div>
-
-            <form onSubmit={handleSaveSeminar} className="space-y-4 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Class Title</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Memory Forensics Live Case Study Analysis"
-                  value={formData.title}
-                  onChange={e => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Join Meeting URL (Google Meet / Teams / Zoom / Webex)
-                </label>
-                <div className="relative">
-                  <LinkIcon className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                  <input
-                    type="url"
-                    required
-                    placeholder="https://meet.google.com/abc-defg-hij or https://teams.microsoft.com/..."
-                    value={formData.link}
-                    onChange={e => setFormData({ ...formData, link: e.target.value })}
-                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Date & Time</label>
-                  <input
-                    type="datetime-local"
-                    required
-                    value={formData.date}
-                    onChange={e => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Duration (Minutes)</label>
-                  <input
-                    type="number"
-                    required
-                    min={15}
-                    max={240}
-                    value={formData.durationMinutes}
-                    onChange={e => setFormData({ ...formData, durationMinutes: Number(e.target.value) })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Instructor Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.instructorName}
-                    onChange={e => setFormData({ ...formData, instructorName: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Max Participant Seats</label>
-                  <input
-                    type="number"
-                    required
-                    min={10}
-                    value={formData.maxParticipants}
-                    onChange={e => setFormData({ ...formData, maxParticipants: Number(e.target.value) })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Session Description / Topic</label>
-                <textarea
-                  rows={3}
-                  placeholder="Outline what evidence artifacts or tools will be covered live."
-                  value={formData.description}
-                  onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-brand-darkBorder bg-slate-50 dark:bg-brand-darkBg text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-glowCyan outline-none resize-none"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-brand-darkBorder">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-brand-darkBg text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-200 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-5 py-2 rounded-xl bg-brand-deepBlue text-white dark:bg-brand-glowBlue font-bold hover:bg-brand-glowCyan transition-colors disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : editingId ? 'Update Meeting Link' : 'Schedule Class'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </>
   );
 }

@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { rateLimit } from 'express-rate-limit';
-import { and, arrayContains, asc, desc, eq, gt, sql } from 'drizzle-orm';
+import { and, arrayContains, asc, desc, eq, gt, inArray, sql } from 'drizzle-orm';
 import {
   db,
   connectDB,
@@ -37,7 +37,8 @@ import { computeCourseAnalytics, computeOverview } from './analytics';
 import { isAllowedUpload, safeUploadName } from './uploads';
 import { validateSchedule, expandSchedule } from './courseSchedule';
 import { demoPrograms, demoLiveSessions } from './demoPrograms';
-import { inviteTemplate, readMailerConfig, resetPasswordUrl, resetTemplate, sendMail } from './mailer';
+import { inviteTemplate, otpTemplate, readMailerConfig, resetPasswordUrl, resetTemplate, sendMail } from './mailer';
+import { otpStore, otpFailureMessage } from './emailOtp';
 import { publicUser, hashToken, issueToken, validatePassword } from './security';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
@@ -129,6 +130,8 @@ const authLimiter = rateLimit({
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/mfa/login', authLimiter);
+app.use('/api/auth/verify-otp', authLimiter);
+app.use('/api/auth/resend-otp', authLimiter);
 app.use('/api/auth/forgot-password', authLimiter);
 app.use('/api/auth/reset-password-magic', authLimiter);
 app.use('/api/auth/verify-magic-token', authLimiter);
@@ -1272,6 +1275,33 @@ const requirePermission = (feature: string, action: PermAction) =>
     }
   };
 
+// --- EMAIL ONE-TIME CODES ---
+// Every sign-in and sign-up passes through a code mailed to the address on the
+// account. What the code is standing in for differs — a sign-in already has a
+// user row, a sign-up is still only a form — so the pending state travels in the
+// challenge and the route that consumes it decides what to do with it.
+type OtpPayload =
+  | { kind: 'signup'; name: string; email: string; passwordHash: string }
+  | { kind: 'signin'; userId: string; name: string; email: string };
+
+const sessionToken = (user: { id: string; email: string; role: string }) =>
+  jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+
+/**
+ * Creates a challenge and mails the code.
+ *
+ * A failed send is logged with the code rather than surfaced as an error: with
+ * no SMTP host configured (local development) the console is the inbox, and the
+ * sign-in flow has to stay walkable.
+ */
+async function issueEmailOtp(payload: OtpPayload, purpose: 'signin' | 'signup'): Promise<{ otpToken: string }> {
+  const { otpToken, code } = otpStore.issue(payload);
+  const firstName = payload.name.trim().split(/\s+/)[0] || 'there';
+  const sent = await sendMail(payload.email, otpTemplate(firstName, code, purpose));
+  if (!sent) console.log(`[OTP] ${purpose} code for ${payload.email}: ${code}`);
+  return { otpToken };
+}
+
 // --- HEALTH CHECK ---
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({ 
@@ -1317,7 +1347,9 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
       return res.status(201).json({ token, user: { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role } });
     }
 
-    const [existingUser] = await db.select().from(users).where(eq(users.email, email));
+    const cleanEmail = String(email).trim().toLowerCase();
+
+    const [existingUser] = await db.select().from(users).where(eq(users.email, cleanEmail));
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
@@ -1325,23 +1357,16 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    const [newUser] = await db.insert(users).values({
-      name,
-      email,
-      passwordHash,
-      role: 'student'
-    }).returning();
+    // The row is not written yet. The account only exists once the code that was
+    // mailed to this address comes back, which is what makes the address verified
+    // rather than merely typed — and leaves no half-made users behind if it never does.
+    const { otpToken } = await issueEmailOtp({ kind: 'signup', name, email: cleanEmail, passwordHash }, 'signup');
 
-    const token = jwt.sign({ id: newUser.id, email: newUser.email, role: newUser.role }, JWT_SECRET, { expiresIn: '7d' });
-
-    res.status(201).json({
-      token,
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role
-      }
+    res.status(202).json({
+      otpRequired: true,
+      otpToken,
+      email: cleanEmail,
+      message: `We sent a 6-digit code to ${cleanEmail}. Enter it to finish creating your account.`
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Server error during registration', error: error.message });
@@ -1386,24 +1411,106 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    // An authenticator app is the stronger second factor, so accounts that set
+    // one up keep using it; everyone else gets the code by email. Either way the
+    // password alone never returns a session.
     if (user.mfaEnabled) {
       const mfaToken = jwt.sign({ id: user.id, email: user.email, role: user.role, mfa: 'pending' }, JWT_SECRET, { expiresIn: '5m' });
       return res.json({ mfaRequired: true, mfaToken });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const { otpToken } = await issueEmailOtp(
+      { kind: 'signin', userId: user.id, name: user.name, email: user.email },
+      'signin'
+    );
 
     res.json({
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
+      otpRequired: true,
+      otpToken,
+      email: user.email,
+      message: `We sent a 6-digit code to ${user.email}. Enter it to finish signing in.`
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Server error during login', error: error.message });
+  }
+});
+
+/**
+ * Second step of both sign-in and sign-up: exchange the emailed code for a session.
+ *
+ * For a sign-up this is also the moment the user row is written, so the duplicate
+ * check runs again here — two people can start registering the same address at
+ * once, and only the unique index would otherwise catch the loser, as a 500.
+ */
+app.post('/api/auth/verify-otp', async (req: Request, res: Response) => {
+  try {
+    const { otpToken, code } = req.body;
+    if (!otpToken || !code) {
+      return res.status(400).json({ message: 'otpToken and code are required' });
+    }
+
+    const result = otpStore.verify<OtpPayload>(String(otpToken), String(code));
+    if (!result.ok || !result.data) {
+      return res.status(400).json({ message: otpFailureMessage(result.reason), reason: result.reason });
+    }
+
+    const payload = result.data;
+
+    if (payload.kind === 'signup') {
+      const [taken] = await db.select().from(users).where(eq(users.email, payload.email));
+      if (taken) return res.status(400).json({ message: 'User already exists' });
+
+      const [newUser] = await db.insert(users).values({
+        name: payload.name,
+        email: payload.email,
+        passwordHash: payload.passwordHash,
+        role: 'student'
+      }).returning();
+
+      return res.status(201).json({
+        token: sessionToken(newUser),
+        user: { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role }
+      });
+    }
+
+    // Re-read the user: the account may have been deleted or demoted in the ten
+    // minutes the code was outstanding, and the token must carry the role it has now.
+    const user = await byId(users, payload.userId);
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+
+    res.json({
+      token: sessionToken(user),
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error verifying code', error: error.message });
+  }
+});
+
+// Mails a fresh code for a challenge already in flight, so "resend" does not make
+// the client hold on to the password.
+app.post('/api/auth/resend-otp', async (req: Request, res: Response) => {
+  try {
+    const { otpToken } = req.body;
+    if (!otpToken) return res.status(400).json({ message: 'otpToken is required' });
+
+    const next = otpStore.reissue<OtpPayload>(String(otpToken));
+    if (!next) {
+      return res.status(400).json({ message: 'That request has expired. Please start again.', reason: 'expired' });
+    }
+
+    const firstName = next.data.name.trim().split(/\s+/)[0] || 'there';
+    const sent = await sendMail(next.data.email, otpTemplate(firstName, next.code, next.data.kind === 'signup' ? 'signup' : 'signin'));
+    if (!sent) console.log(`[OTP] resent code for ${next.data.email}: ${next.code}`);
+
+    res.json({
+      otpRequired: true,
+      otpToken: next.otpToken,
+      email: next.data.email,
+      message: `A new code is on its way to ${next.data.email}.`
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error resending code', error: error.message });
   }
 });
 
@@ -1429,8 +1536,8 @@ app.get('/api/auth/profile', protect, async (req: AuthRequest, res: Response) =>
     // `populate('enrolledCourses')` replaced the id list with the course rows;
     // one IN query does the same without a join table.
     const safeUser = publicUser(user);
-    const enrolled = user.enrolledCourses.length
-      ? await db.select().from(courses).where(sql`${courses.id} = ANY(${user.enrolledCourses})`)
+    const enrolled = user.enrolledCourses?.length
+      ? await db.select().from(courses).where(inArray(courses.id, user.enrolledCourses))
       : [];
 
     res.json({ ...safeUser, enrolledCourses: enrolled });

@@ -24,7 +24,8 @@ import {
   Layers,
   Move,
   Megaphone,
-  Bell
+  Bell,
+  ArrowLeft
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -841,165 +842,170 @@ export default function AdminDashboard() {
           {/* 2b. LEARNING PATHS MANAGER */}
           {activeTab === 'paths' && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center gap-4">
-                <h2 className="text-sm font-extrabold uppercase text-slate-400">Learning Paths Database</h2>
-                <button
-                  onClick={() => {
-                    setPathForm({ id: '', title: '', description: '', category: 'Career Track', courses: [], sequential: true, issueCertificate: true, certificateTitle: '', isActive: true });
-                    setIsPathModalOpen(true);
-                  }}
-                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-900 bg-brand-glowCyan hover:bg-brand-glowBlue hover:text-white rounded-lg transition-colors"
-                >
-                  <Plus className="w-4 h-4" /> Add Path
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {learningPaths.map(p => (
-                  <div key={p.id} className="p-5 rounded-2xl bg-white dark:bg-brand-darkCard border border-slate-200 dark:border-brand-darkBorder shadow-sm flex flex-col justify-between">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-deepBlue/5 dark:bg-brand-glowCyan/10 text-brand-deepBlue dark:text-brand-glowCyan">
-                          {p.category}
-                        </span>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${p.isActive ? 'bg-green-150 text-green-700' : 'bg-red-150 text-red-700'}`}>
-                          {p.isActive ? 'Active' : 'Draft'}
-                        </span>
-                      </div>
-                      <h3 className="text-sm font-bold text-brand-deepBlue dark:text-white line-clamp-1">{p.title}</h3>
-                      <p className="text-xs text-slate-400 line-clamp-2">{p.description}</p>
-                      <span className="text-xs text-slate-400 font-semibold block">
-                        {p.courses?.length || 0} courses{p.sequential ? ' · Sequential' : ''}{p.issueCertificate ? ' · Certificate' : ''}
-                      </span>
-                    </div>
-                    <div className="flex justify-end items-center border-t border-slate-100 dark:border-brand-darkBorder pt-4 mt-4 gap-2">
-                      <button onClick={() => editPath(p)} className="p-1.5 rounded-lg border border-slate-200 dark:border-brand-darkBorder text-slate-500 hover:text-brand-glowCyan">
-                        <Edit className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => deletePath(p.id)} className="p-1.5 rounded-lg border border-slate-200 dark:border-brand-darkBorder text-slate-550 hover:text-red-500">
-                        <Trash className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Path builder modal */}
-              {isPathModalOpen && (
-                <div className="fixed inset-0 bg-slate-950/60 z-50 flex items-center justify-center p-4 overflow-y-auto">
-                  <div className="w-full max-w-2xl bg-white dark:bg-brand-darkCard rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-                    <button onClick={() => setIsPathModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                      <X className="w-5 h-5" />
+              {isPathModalOpen ? (
+                <div className="bg-white dark:bg-brand-darkCard rounded-3xl p-6 sm:p-8 space-y-6 border border-slate-200 dark:border-brand-darkBorder shadow-sm">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-brand-darkBorder pb-4">
+                    <button
+                      type="button"
+                      onClick={() => setIsPathModalOpen(false)}
+                      className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-brand-glowCyan"
+                    >
+                      <ArrowLeft className="w-4 h-4" /> Back to Learning Paths & Diplomas
                     </button>
-                    <h2 className="text-lg font-bold text-brand-deepBlue dark:text-white">
-                      {pathForm.id ? 'Edit Learning Path' : 'Create Learning Path'}
+                    <h2 className="text-base font-extrabold text-brand-deepBlue dark:text-white">
+                      {pathForm.id ? 'Edit Learning Path / Diploma' : 'Create Learning Path / Diploma'}
                     </h2>
-
-                    <form onSubmit={handlePathSubmit} className="space-y-4 text-xs font-semibold">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="sm:col-span-2">
-                          <label htmlFor="adm-p-title" className="block text-[11px] text-slate-450 uppercase mb-1">Path Title</label>
-                          <input
-                            id="adm-p-title" type="text" required
-                            value={pathForm.title}
-                            onChange={e => setPathForm({ ...pathForm, title: e.target.value })}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="adm-p-cat" className="block text-[11px] text-slate-450 uppercase mb-1">Category</label>
-                          <input
-                            id="adm-p-cat" type="text" required
-                            value={pathForm.category}
-                            onChange={e => setPathForm({ ...pathForm, category: e.target.value })}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label htmlFor="adm-p-desc" className="block text-[11px] text-slate-450 uppercase mb-1">Description</label>
-                        <textarea
-                          id="adm-p-desc" required rows={2}
-                          value={pathForm.description}
-                          onChange={e => setPathForm({ ...pathForm, description: e.target.value })}
-                          className="w-full p-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                        ></textarea>
-                      </div>
-
-                      {/* Course selection (order = selection order) */}
-                      <div>
-                        <span className="block text-[11px] text-slate-450 uppercase mb-2">Courses in Path (tick in order)</span>
-                        <div className="space-y-2 max-h-52 overflow-y-auto border border-slate-200 dark:border-brand-darkBorder rounded-lg p-3">
-                          {courses.length === 0 && <p className="text-xs text-slate-400">No courses available. Create courses first.</p>}
-                          {courses.map(c => {
-                            const selected = pathForm.courses.find((pc: any) => pc.courseId === c.id);
-                            const idx = pathForm.courses.findIndex((pc: any) => pc.courseId === c.id);
-                            return (
-                              <div key={c.id} className="flex items-center gap-3">
-                                <input
-                                  type="checkbox"
-                                  checked={!!selected}
-                                  onChange={() => togglePathCourse(c.id)}
-                                  className="w-4 h-4 accent-brand-glowCyan"
-                                />
-                                {selected && (
-                                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-brand-deepBlue text-white text-[11px] font-bold shrink-0">{idx + 1}</span>
-                                )}
-                                <span className="flex-grow text-xs text-slate-600 dark:text-slate-300 line-clamp-1">{c.title}</span>
-                                {selected && (
-                                  <button
-                                    type="button"
-                                    onClick={() => togglePathCourseRequired(c.id)}
-                                    className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full ${selected.required ? 'bg-brand-glowCyan/20 text-brand-deepBlue dark:text-brand-glowCyan' : 'bg-slate-100 dark:bg-brand-darkBg text-slate-400'}`}
-                                  >
-                                    {selected.required ? 'Required' : 'Elective'}
-                                  </button>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="adm-p-certtitle" className="block text-[11px] text-slate-450 uppercase mb-1">Certificate Title (optional)</label>
-                          <input
-                            id="adm-p-certtitle" type="text"
-                            value={pathForm.certificateTitle}
-                            onChange={e => setPathForm({ ...pathForm, certificateTitle: e.target.value })}
-                            placeholder="Defaults to path title"
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                          />
-                        </div>
-                        <div className="flex items-end gap-4">
-                          <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-                            <input type="checkbox" checked={pathForm.sequential} onChange={e => setPathForm({ ...pathForm, sequential: e.target.checked })} className="w-4 h-4 accent-brand-glowCyan" />
-                            Sequential
-                          </label>
-                          <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-                            <input type="checkbox" checked={pathForm.issueCertificate} onChange={e => setPathForm({ ...pathForm, issueCertificate: e.target.checked })} className="w-4 h-4 accent-brand-glowCyan" />
-                            Certificate
-                          </label>
-                          <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-                            <input type="checkbox" checked={pathForm.isActive} onChange={e => setPathForm({ ...pathForm, isActive: e.target.checked })} className="w-4 h-4 accent-brand-glowCyan" />
-                            Active
-                          </label>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-end gap-3 pt-2">
-                        <button type="button" onClick={() => setIsPathModalOpen(false)} className="px-4 py-2 rounded-lg text-xs font-bold text-slate-500 border border-slate-200 dark:border-brand-darkBorder">
-                          Cancel
-                        </button>
-                        <button type="submit" className="px-5 py-2 rounded-lg text-xs font-bold text-white bg-brand-deepBlue dark:bg-brand-glowBlue hover:bg-brand-glowCyan transition-colors">
-                          {pathForm.id ? 'Update Path' : 'Create Path'}
-                        </button>
-                      </div>
-                    </form>
                   </div>
+
+                  <form onSubmit={handlePathSubmit} className="space-y-4 text-xs font-semibold">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="sm:col-span-2">
+                        <label htmlFor="adm-p-title" className="block text-[11px] text-slate-450 uppercase mb-1">Path Title</label>
+                        <input
+                          id="adm-p-title" type="text" required
+                          value={pathForm.title}
+                          onChange={e => setPathForm({ ...pathForm, title: e.target.value })}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="adm-p-cat" className="block text-[11px] text-slate-450 uppercase mb-1">Category</label>
+                        <input
+                          id="adm-p-cat" type="text" required
+                          value={pathForm.category}
+                          onChange={e => setPathForm({ ...pathForm, category: e.target.value })}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="adm-p-desc" className="block text-[11px] text-slate-450 uppercase mb-1">Description</label>
+                      <textarea
+                        id="adm-p-desc" required rows={2}
+                        value={pathForm.description}
+                        onChange={e => setPathForm({ ...pathForm, description: e.target.value })}
+                        className="w-full p-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
+                      ></textarea>
+                    </div>
+
+                    {/* Course selection (order = selection order) */}
+                    <div>
+                      <span className="block text-[11px] text-slate-450 uppercase mb-2">Courses in Path (tick in order)</span>
+                      <div className="space-y-2 max-h-52 overflow-y-auto border border-slate-200 dark:border-brand-darkBorder rounded-lg p-3">
+                        {courses.length === 0 && <p className="text-xs text-slate-400">No courses available. Create courses first.</p>}
+                        {courses.map(c => {
+                          const selected = pathForm.courses.find((pc: any) => pc.courseId === c.id);
+                          const idx = pathForm.courses.findIndex((pc: any) => pc.courseId === c.id);
+                          return (
+                            <div key={c.id} className="flex items-center gap-3">
+                              <input
+                                type="checkbox"
+                                checked={!!selected}
+                                onChange={() => togglePathCourse(c.id)}
+                                className="w-4 h-4 accent-brand-glowCyan"
+                              />
+                              {selected && (
+                                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-brand-deepBlue text-white text-[11px] font-bold shrink-0">{idx + 1}</span>
+                              )}
+                              <span className="flex-grow text-xs text-slate-600 dark:text-slate-300 line-clamp-1">{c.title}</span>
+                              {selected && (
+                                <button
+                                  type="button"
+                                  onClick={() => togglePathCourseRequired(c.id)}
+                                  className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full ${selected.required ? 'bg-brand-glowCyan/20 text-brand-deepBlue dark:text-brand-glowCyan' : 'bg-slate-100 dark:bg-brand-darkBg text-slate-400'}`}
+                                >
+                                  {selected.required ? 'Required' : 'Elective'}
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="adm-p-certtitle" className="block text-[11px] text-slate-450 uppercase mb-1">Certificate Title (optional)</label>
+                        <input
+                          id="adm-p-certtitle" type="text"
+                          value={pathForm.certificateTitle}
+                          onChange={e => setPathForm({ ...pathForm, certificateTitle: e.target.value })}
+                          placeholder="Defaults to path title"
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
+                        />
+                      </div>
+                      <div className="flex items-end gap-4">
+                        <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                          <input type="checkbox" checked={pathForm.sequential} onChange={e => setPathForm({ ...pathForm, sequential: e.target.checked })} className="w-4 h-4 accent-brand-glowCyan" />
+                          Sequential
+                        </label>
+                        <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                          <input type="checkbox" checked={pathForm.issueCertificate} onChange={e => setPathForm({ ...pathForm, issueCertificate: e.target.checked })} className="w-4 h-4 accent-brand-glowCyan" />
+                          Certificate
+                        </label>
+                        <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                          <input type="checkbox" checked={pathForm.isActive} onChange={e => setPathForm({ ...pathForm, isActive: e.target.checked })} className="w-4 h-4 accent-brand-glowCyan" />
+                          Active
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button type="button" onClick={() => setIsPathModalOpen(false)} className="px-4 py-2 rounded-lg text-xs font-bold text-slate-500 border border-slate-200 dark:border-brand-darkBorder">
+                        Cancel
+                      </button>
+                      <button type="submit" className="px-5 py-2 rounded-lg text-xs font-bold text-white bg-brand-deepBlue dark:bg-brand-glowBlue hover:bg-brand-glowCyan transition-colors">
+                        {pathForm.id ? 'Update Path' : 'Create Path'}
+                      </button>
+                    </div>
+                  </form>
                 </div>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center gap-4">
+                    <h2 className="text-sm font-extrabold uppercase text-slate-400">Learning Paths Database</h2>
+                    <button
+                      onClick={() => {
+                        setPathForm({ id: '', title: '', description: '', category: 'Career Track', courses: [], sequential: true, issueCertificate: true, certificateTitle: '', isActive: true });
+                        setIsPathModalOpen(true);
+                      }}
+                      className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-900 bg-brand-glowCyan hover:bg-brand-glowBlue hover:text-white rounded-lg transition-colors"
+                    >
+                      <Plus className="w-4 h-4" /> Add Path
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {learningPaths.map(p => (
+                      <div key={p.id} className="p-5 rounded-2xl bg-white dark:bg-brand-darkCard border border-slate-200 dark:border-brand-darkBorder shadow-sm flex flex-col justify-between">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-deepBlue/5 dark:bg-brand-glowCyan/10 text-brand-deepBlue dark:text-brand-glowCyan">
+                              {p.category}
+                            </span>
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${p.isActive ? 'bg-green-150 text-green-700' : 'bg-red-150 text-red-700'}`}>
+                              {p.isActive ? 'Active' : 'Draft'}
+                            </span>
+                          </div>
+                          <h3 className="text-sm font-bold text-brand-deepBlue dark:text-white line-clamp-1">{p.title}</h3>
+                          <p className="text-xs text-slate-400 line-clamp-2">{p.description}</p>
+                          <span className="text-xs text-slate-400 font-semibold block">
+                            {p.courses?.length || 0} courses{p.sequential ? ' · Sequential' : ''}{p.issueCertificate ? ' · Certificate' : ''}
+                          </span>
+                        </div>
+                        <div className="flex justify-end items-center border-t border-slate-100 dark:border-brand-darkBorder pt-4 mt-4 gap-2">
+                          <button onClick={() => editPath(p)} className="p-1.5 rounded-lg border border-slate-200 dark:border-brand-darkBorder text-slate-500 hover:text-brand-glowCyan">
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => deletePath(p.id)} className="p-1.5 rounded-lg border border-slate-200 dark:border-brand-darkBorder text-slate-550 hover:text-red-500">
+                            <Trash className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           )}
@@ -1007,270 +1013,280 @@ export default function AdminDashboard() {
           {/* 3. QUIZZES MANAGER */}
           {activeTab === 'quizzes' && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center gap-4">
-                <h2 className="text-sm font-extrabold uppercase text-slate-400">Assessments Database</h2>
-                <button
-                  onClick={() => {
-                    setQuizForm({ id: '', title: '', description: '', category: 'Digital Forensics', courseId: undefined, timeLimitMinutes: 15, questions: [], passingPercentage: 80, negativeMarking: false, negativeMarkFraction: 0.25, attemptsAllowed: 0, isActive: true });
-                    setIsQuizModalOpen(true);
-                  }}
-                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-900 bg-brand-glowCyan hover:bg-brand-glowBlue hover:text-white rounded-lg transition-colors"
-                >
-                  <Plus className="w-4 h-4" /> Add Assessment
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                {quizzes.map(q => (
-                  <div key={q.id} className="p-6 rounded-2xl bg-white dark:bg-brand-darkCard border border-slate-200 dark:border-brand-darkBorder flex items-center justify-between gap-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-deepBlue/5 dark:bg-brand-glowCyan/10 text-brand-deepBlue dark:text-brand-glowCyan">
-                          {q.category}
-                        </span>
-                        <span className="flex items-center gap-1 text-[11px] text-slate-400">
-                          <Clock className="w-3.5 h-3.5" /> {q.timeLimitMinutes} Mins
-                        </span>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${q.isActive ? 'bg-green-150 text-green-700' : 'bg-red-150 text-red-700'}`}>
-                          {q.isActive ? 'Active' : 'Draft'}
-                        </span>
-                      </div>
-                      <h3 className="text-sm font-bold text-brand-deepBlue dark:text-white">{q.title}</h3>
-                      <span className="text-xs text-slate-400 block font-semibold">{q.questions?.length || 0} Questions loaded</span>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => editQuiz(q)}
-                        className="p-1.5 rounded-lg border border-slate-200 dark:border-brand-darkBorder text-slate-500 hover:text-brand-glowCyan"
-                      >
-                        <Edit className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => deleteQuiz(q.id)}
-                        className="p-1.5 rounded-lg border border-slate-200 dark:border-brand-darkBorder text-slate-550 hover:text-red-500"
-                      >
-                        <Trash className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Quiz form overlay */}
-              {isQuizModalOpen && (
-                <div className="fixed inset-0 bg-slate-950/60 z-50 flex items-center justify-center p-4 overflow-y-auto">
-                  <div className="w-full max-w-2xl bg-white dark:bg-brand-darkCard rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-                    <button onClick={() => setIsQuizModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                      <X className="w-5 h-5" />
+              {isQuizModalOpen ? (
+                <div className="bg-white dark:bg-brand-darkCard rounded-3xl p-6 sm:p-8 space-y-6 border border-slate-200 dark:border-brand-darkBorder shadow-sm">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-brand-darkBorder pb-4">
+                    <button
+                      type="button"
+                      onClick={() => setIsQuizModalOpen(false)}
+                      className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-brand-glowCyan"
+                    >
+                      <ArrowLeft className="w-4 h-4" /> Back to Quizzes & Assessments
                     </button>
-                    <h2 className="text-lg font-bold text-brand-deepBlue dark:text-white">
-                      {quizForm.id ? 'Edit Assessment parameters' : 'Create Assessment parameters'}
+                    <h2 className="text-base font-extrabold text-brand-deepBlue dark:text-white">
+                      {quizForm.id ? 'Edit Assessment Parameters' : 'Create Assessment Parameters'}
                     </h2>
+                  </div>
 
-                    <form onSubmit={handleQuizSubmit} className="space-y-4 text-xs font-semibold">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="sm:col-span-2">
-                          <label htmlFor="adm-q-title" className="block text-[11px] text-slate-450 uppercase mb-1">Assessment Title</label>
-                          <input
-                            id="adm-q-title"
-                            type="text" required
-                            value={quizForm.title}
-                            onChange={e => setQuizForm({...quizForm, title: e.target.value})}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="adm-q-lim" className="block text-[11px] text-slate-450 uppercase mb-1">Time Limit (Mins)</label>
-                          <input
-                            id="adm-q-lim"
-                            type="number" required
-                            value={quizForm.timeLimitMinutes}
-                            onChange={e => setQuizForm({...quizForm, timeLimitMinutes: parseInt(e.target.value) || 15})}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                          />
-                        </div>
+                  <form onSubmit={handleQuizSubmit} className="space-y-4 text-xs font-semibold">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="sm:col-span-2">
+                        <label htmlFor="adm-q-title" className="block text-[11px] text-slate-450 uppercase mb-1">Assessment Title</label>
+                        <input
+                          id="adm-q-title"
+                          type="text" required
+                          value={quizForm.title}
+                          onChange={e => setQuizForm({...quizForm, title: e.target.value})}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
+                        />
                       </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="adm-q-cat" className="block text-[11px] text-slate-450 uppercase mb-1">Category</label>
-                          <select
-                            id="adm-q-cat"
-                            value={quizForm.category}
-                            onChange={e => setQuizForm({...quizForm, category: e.target.value})}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder text-slate-700 dark:text-slate-350 focus:outline-none"
-                          >
-                            <option>Digital Forensics</option>
-                            <option>Physical Labs</option>
-                            <option>Biometrics</option>
-                            <option>General Forensic</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label htmlFor="adm-q-course" className="block text-[11px] text-slate-450 uppercase mb-1">Linked Course ID (Optional)</label>
-                          <select
-                            id="adm-q-course"
-                            value={quizForm.courseId || ''}
-                            onChange={e => setQuizForm({...quizForm, courseId: e.target.value || undefined})}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder text-slate-700 dark:text-slate-350 focus:outline-none"
-                          >
-                            <option value="">None</option>
-                            {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-                          </select>
-                        </div>
-                      </div>
-
                       <div>
-                        <label htmlFor="adm-q-desc" className="block text-[11px] text-slate-450 uppercase mb-1">Description</label>
-                        <textarea
-                          id="adm-q-desc"
-                          required rows={2}
-                          value={quizForm.description}
-                          onChange={e => setQuizForm({...quizForm, description: e.target.value})}
-                          className="w-full p-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                        ></textarea>
+                        <label htmlFor="adm-q-lim" className="block text-[11px] text-slate-450 uppercase mb-1">Time Limit (Mins)</label>
+                        <input
+                          id="adm-q-lim"
+                          type="number" required
+                          value={quizForm.timeLimitMinutes}
+                          onChange={e => setQuizForm({...quizForm, timeLimitMinutes: parseInt(e.target.value) || 15})}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
+                        />
                       </div>
+                    </div>
 
-                      {/* Assessment scoring settings */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-end border-t border-slate-200 dark:border-brand-darkBorder pt-4">
-                        <div>
-                          <label htmlFor="adm-q-pass" className="block text-[11px] text-slate-450 uppercase mb-1">Pass %</label>
-                          <input
-                            id="adm-q-pass" type="number" min={0} max={100}
-                            value={quizForm.passingPercentage}
-                            onChange={e => setQuizForm({ ...quizForm, passingPercentage: parseInt(e.target.value) || 0 })}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="adm-q-attempts" className="block text-[11px] text-slate-450 uppercase mb-1">Max Attempts (0=∞)</label>
-                          <input
-                            id="adm-q-attempts" type="number" min={0}
-                            value={quizForm.attemptsAllowed}
-                            onChange={e => setQuizForm({ ...quizForm, attemptsAllowed: parseInt(e.target.value) || 0 })}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="adm-q-negfrac" className="block text-[11px] text-slate-450 uppercase mb-1">Neg. Mark Fraction</label>
-                          <input
-                            id="adm-q-negfrac" type="number" min={0} max={1} step={0.05}
-                            value={quizForm.negativeMarkFraction}
-                            onChange={e => setQuizForm({ ...quizForm, negativeMarkFraction: parseFloat(e.target.value) || 0 })}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none disabled:opacity-40"
-                            disabled={!quizForm.negativeMarking}
-                          />
-                        </div>
-                        <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 h-9">
-                          <input type="checkbox" checked={quizForm.negativeMarking} onChange={e => setQuizForm({ ...quizForm, negativeMarking: e.target.checked })} className="w-4 h-4 accent-brand-glowCyan" />
-                          Negative marking
-                        </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="adm-q-cat" className="block text-[11px] text-slate-450 uppercase mb-1">Category</label>
+                        <select
+                          id="adm-q-cat"
+                          value={quizForm.category}
+                          onChange={e => setQuizForm({...quizForm, category: e.target.value})}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder text-slate-700 dark:text-slate-350 focus:outline-none"
+                        >
+                          <option>Digital Forensics</option>
+                          <option>Physical Labs</option>
+                          <option>Biometrics</option>
+                          <option>General Forensic</option>
+                        </select>
                       </div>
+                      <div>
+                        <label htmlFor="adm-q-course" className="block text-[11px] text-slate-450 uppercase mb-1">Linked Course ID (Optional)</label>
+                        <select
+                          id="adm-q-course"
+                          value={quizForm.courseId || ''}
+                          onChange={e => setQuizForm({...quizForm, courseId: e.target.value || undefined})}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder text-slate-700 dark:text-slate-350 focus:outline-none"
+                        >
+                          <option value="">None</option>
+                          {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                        </select>
+                      </div>
+                    </div>
 
-                      {/* Question builder panel */}
-                      <div className="border-t border-slate-200 dark:border-brand-darkBorder pt-4 space-y-4">
-                        <span className="block text-xs uppercase font-extrabold tracking-widest text-slate-400">Questions List ({quizForm.questions.length})</span>
-                        
-                        {quizForm.questions.map((q, idx) => (
-                          <div key={idx} className="flex justify-between items-start gap-4 p-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder">
-                            <div>
-                              <span className="text-[10px] uppercase font-bold text-brand-glowCyan">Q{idx + 1}. {q.questionText}</span>
-                              <ul className="text-[10px] text-slate-400 space-y-0.5 mt-1 font-medium">
-                                {q.options.map((opt: string, i: number) => (
-                                  <li key={i} className={q.correctOptionIndex === i ? 'text-green-500 font-bold' : ''}>
-                                    {String.fromCharCode(65 + i)}. {opt}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveQuestion(idx)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ))}
+                    <div>
+                      <label htmlFor="adm-q-desc" className="block text-[11px] text-slate-450 uppercase mb-1">Description</label>
+                      <textarea
+                        id="adm-q-desc"
+                        required rows={2}
+                        value={quizForm.description}
+                        onChange={e => setQuizForm({...quizForm, description: e.target.value})}
+                        className="w-full p-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
+                      ></textarea>
+                    </div>
 
-                        {/* Add new question block */}
-                        <div className="p-4 rounded-xl border border-dashed border-slate-350 dark:border-brand-darkBorder space-y-3 bg-slate-50/30">
+                    {/* Assessment scoring settings */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-end border-t border-slate-200 dark:border-brand-darkBorder pt-4">
+                      <div>
+                        <label htmlFor="adm-q-pass" className="block text-[11px] text-slate-450 uppercase mb-1">Pass %</label>
+                        <input
+                          id="adm-q-pass" type="number" min={0} max={100}
+                          value={quizForm.passingPercentage}
+                          onChange={e => setQuizForm({ ...quizForm, passingPercentage: parseInt(e.target.value) || 0 })}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="adm-q-attempts" className="block text-[11px] text-slate-450 uppercase mb-1">Max Attempts (0=∞)</label>
+                        <input
+                          id="adm-q-attempts" type="number" min={0}
+                          value={quizForm.attemptsAllowed}
+                          onChange={e => setQuizForm({ ...quizForm, attemptsAllowed: parseInt(e.target.value) || 0 })}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="adm-q-negfrac" className="block text-[11px] text-slate-450 uppercase mb-1">Neg. Mark Fraction</label>
+                        <input
+                          id="adm-q-negfrac" type="number" min={0} max={1} step={0.05}
+                          value={quizForm.negativeMarkFraction}
+                          onChange={e => setQuizForm({ ...quizForm, negativeMarkFraction: parseFloat(e.target.value) || 0 })}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none disabled:opacity-40"
+                          disabled={!quizForm.negativeMarking}
+                        />
+                      </div>
+                      <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 h-9">
+                        <input type="checkbox" checked={quizForm.negativeMarking} onChange={e => setQuizForm({ ...quizForm, negativeMarking: e.target.checked })} className="w-4 h-4 accent-brand-glowCyan" />
+                        Negative marking
+                      </label>
+                    </div>
+
+                    {/* Question builder panel */}
+                    <div className="border-t border-slate-200 dark:border-brand-darkBorder pt-4 space-y-4">
+                      <span className="block text-xs uppercase font-extrabold tracking-widest text-slate-400">Questions List ({quizForm.questions.length})</span>
+                      
+                      {quizForm.questions.map((q, idx) => (
+                        <div key={idx} className="flex justify-between items-start gap-4 p-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder">
                           <div>
-                            <label htmlFor="adm-q-text" className="block text-[11px] text-slate-450 uppercase mb-1">New Question Text</label>
-                            <input
-                              id="adm-q-text"
-                              type="text"
-                              value={newQuestion.questionText}
-                              onChange={e => setNewQuestion({...newQuestion, questionText: e.target.value})}
-                              className="w-full h-8 px-2 rounded bg-white dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder"
-                            />
+                            <span className="text-[10px] uppercase font-bold text-brand-glowCyan">Q{idx + 1}. {q.questionText}</span>
+                            <ul className="text-[10px] text-slate-400 space-y-0.5 mt-1 font-medium">
+                              {q.options.map((opt: string, i: number) => (
+                                <li key={i} className={q.correctOptionIndex === i ? 'text-green-500 font-bold' : ''}>
+                                  {String.fromCharCode(65 + i)}. {opt}
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {newQuestion.options.map((opt, oIdx) => (
-                              <div key={oIdx}>
-                                <label htmlFor={`adm-q-o${oIdx}`} className="block text-[10px] text-slate-400 uppercase mb-0.5">Option {String.fromCharCode(65 + oIdx)}</label>
-                                <input
-                                  id={`adm-q-o${oIdx}`}
-                                  type="text"
-                                  value={opt}
-                                  onChange={e => {
-                                    const opts = [...newQuestion.options];
-                                    opts[oIdx] = e.target.value;
-                                    setNewQuestion({...newQuestion, options: opts});
-                                  }}
-                                  className="w-full h-8 px-2 rounded bg-white dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder"
-                                />
-                              </div>
-                            ))}
-                          </div>
-
-                          <div>
-                            <label htmlFor="adm-q-ans" className="block text-[11px] text-slate-450 uppercase mb-1">Correct Option index</label>
-                            <select
-                              id="adm-q-ans"
-                              value={newQuestion.correctOptionIndex}
-                              onChange={e => setNewQuestion({...newQuestion, correctOptionIndex: parseInt(e.target.value) || 0})}
-                              className="w-full h-8 px-2 rounded bg-white dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder text-slate-700 dark:text-slate-350"
-                            >
-                              <option value="0">A</option>
-                              <option value="1">B</option>
-                              <option value="2">C</option>
-                              <option value="3">D</option>
-                            </select>
-                          </div>
-
                           <button
                             type="button"
-                            onClick={handleAddQuestion}
-                            className="w-full py-1.5 rounded bg-brand-deepBlue/10 text-brand-deepBlue dark:bg-brand-glowCyan/10 dark:text-brand-glowCyan text-[11px] font-bold hover:bg-brand-deepBlue/25 transition-colors"
+                            onClick={() => handleRemoveQuestion(idx)}
+                            className="text-red-500 hover:text-red-700"
                           >
-                            Add Question to List
+                            <X className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                      </div>
+                      ))}
 
-                      <div className="flex items-center gap-2">
-                        <input
-                          id="adm-q-act"
-                          type="checkbox"
-                          checked={quizForm.isActive}
-                          onChange={e => setQuizForm({...quizForm, isActive: e.target.checked})}
-                          className="w-4 h-4 rounded text-brand-glowCyan border-slate-300"
-                        />
-                        <label htmlFor="adm-q-act" className="text-xs font-bold text-slate-700 dark:text-slate-300">Set active & publish assessment</label>
-                      </div>
+                      {/* Add new question block */}
+                      <div className="p-4 rounded-xl border border-dashed border-slate-350 dark:border-brand-darkBorder space-y-3 bg-slate-50/30">
+                        <div>
+                          <label htmlFor="adm-q-text" className="block text-[11px] text-slate-450 uppercase mb-1">New Question Text</label>
+                          <input
+                            id="adm-q-text"
+                            type="text"
+                            value={newQuestion.questionText}
+                            onChange={e => setNewQuestion({...newQuestion, questionText: e.target.value})}
+                            className="w-full h-8 px-2 rounded bg-white dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder"
+                          />
+                        </div>
 
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {newQuestion.options.map((opt, oIdx) => (
+                            <div key={oIdx}>
+                              <label htmlFor={`adm-q-o${oIdx}`} className="block text-[10px] text-slate-400 uppercase mb-0.5">Option {String.fromCharCode(65 + oIdx)}</label>
+                              <input
+                                id={`adm-q-o${oIdx}`}
+                                type="text"
+                                value={opt}
+                                onChange={e => {
+                                  const opts = [...newQuestion.options];
+                                  opts[oIdx] = e.target.value;
+                                  setNewQuestion({...newQuestion, options: opts});
+                                }}
+                                className="w-full h-8 px-2 rounded bg-white dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder"
+                              />
+                            </div>
+                          ))}
+                        </div>
+
+                        <div>
+                          <label htmlFor="adm-q-ans" className="block text-[11px] text-slate-450 uppercase mb-1">Correct Option index</label>
+                          <select
+                            id="adm-q-ans"
+                            value={newQuestion.correctOptionIndex}
+                            onChange={e => setNewQuestion({...newQuestion, correctOptionIndex: parseInt(e.target.value) || 0})}
+                            className="w-full h-8 px-2 rounded bg-white dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder text-slate-700 dark:text-slate-350"
+                          >
+                            <option value="0">A</option>
+                            <option value="1">B</option>
+                            <option value="2">C</option>
+                            <option value="3">D</option>
+                          </select>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleAddQuestion}
+                          className="w-full py-1.5 rounded bg-brand-deepBlue/10 text-brand-deepBlue dark:bg-brand-glowCyan/10 dark:text-brand-glowCyan text-[11px] font-bold hover:bg-brand-deepBlue/25 transition-colors"
+                        >
+                          Add Question to List
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="adm-q-act"
+                        type="checkbox"
+                        checked={quizForm.isActive}
+                        onChange={e => setQuizForm({...quizForm, isActive: e.target.checked})}
+                        className="w-4 h-4 rounded text-brand-glowCyan border-slate-300"
+                      />
+                      <label htmlFor="adm-q-act" className="text-xs font-bold text-slate-700 dark:text-slate-300">Set active & publish assessment</label>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button type="button" onClick={() => setIsQuizModalOpen(false)} className="px-4 py-2 rounded-lg text-xs font-bold text-slate-500 border border-slate-200 dark:border-brand-darkBorder">
+                        Cancel
+                      </button>
                       <button
                         type="submit"
-                        className="w-full py-2.5 rounded-lg bg-brand-deepBlue dark:bg-brand-glowBlue hover:bg-brand-glowCyan text-white text-xs font-bold transition-colors"
+                        className="px-5 py-2.5 rounded-lg bg-brand-deepBlue dark:bg-brand-glowBlue hover:bg-brand-glowCyan text-white text-xs font-bold transition-colors"
                       >
                         Save Assessment parameters
                       </button>
-                    </form>
-                  </div>
+                    </div>
+                  </form>
                 </div>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center gap-4">
+                    <h2 className="text-sm font-extrabold uppercase text-slate-400">Assessments Database</h2>
+                    <button
+                      onClick={() => {
+                        setQuizForm({ id: '', title: '', description: '', category: 'Digital Forensics', courseId: undefined, timeLimitMinutes: 15, questions: [], passingPercentage: 80, negativeMarking: false, negativeMarkFraction: 0.25, attemptsAllowed: 0, isActive: true });
+                        setIsQuizModalOpen(true);
+                      }}
+                      className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-900 bg-brand-glowCyan hover:bg-brand-glowBlue hover:text-white rounded-lg transition-colors"
+                    >
+                      <Plus className="w-4 h-4" /> Add Assessment
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {quizzes.map(q => (
+                      <div key={q.id} className="p-6 rounded-2xl bg-white dark:bg-brand-darkCard border border-slate-200 dark:border-brand-darkBorder flex items-center justify-between gap-6">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-deepBlue/5 dark:bg-brand-glowCyan/10 text-brand-deepBlue dark:text-brand-glowCyan">
+                              {q.category}
+                            </span>
+                            <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                              <Clock className="w-3.5 h-3.5" /> {q.timeLimitMinutes} Mins
+                            </span>
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${q.isActive ? 'bg-green-150 text-green-700' : 'bg-red-150 text-red-700'}`}>
+                              {q.isActive ? 'Active' : 'Draft'}
+                            </span>
+                          </div>
+                          <h3 className="text-sm font-bold text-brand-deepBlue dark:text-white">{q.title}</h3>
+                          <span className="text-xs text-slate-400 block font-semibold">{q.questions?.length || 0} Questions loaded</span>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => editQuiz(q)}
+                            className="p-1.5 rounded-lg border border-slate-200 dark:border-brand-darkBorder text-slate-500 hover:text-brand-glowCyan"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => deleteQuiz(q.id)}
+                            className="p-1.5 rounded-lg border border-slate-200 dark:border-brand-darkBorder text-slate-550 hover:text-red-500"
+                          >
+                            <Trash className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           )}
@@ -1482,166 +1498,176 @@ export default function AdminDashboard() {
 
           {activeTab === 'research' && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center gap-4">
-                <h2 className="text-sm font-extrabold uppercase text-slate-400">Research Journal Database</h2>
-                <button
-                  onClick={() => {
-                    setResearchForm({ id: '', title: '', abstract: '', content: '', category: 'Digital Forensics', authors: '', readTimeMinutes: 8, citation: '', isActive: true });
-                    setIsResearchModalOpen(true);
-                  }}
-                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-900 bg-brand-glowCyan hover:bg-brand-glowBlue hover:text-white rounded-lg transition-colors"
-                >
-                  <Plus className="w-4 h-4" /> Publish Research
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                {research.map(p => (
-                  <div key={p.id} className="p-6 rounded-2xl bg-white dark:bg-brand-darkCard border border-slate-200 dark:border-brand-darkBorder flex items-center justify-between gap-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-deepBlue/5 dark:bg-brand-glowCyan/10 text-brand-deepBlue dark:text-brand-glowCyan">
-                          {p.category}
-                        </span>
-                        <span className="text-[11px] text-slate-400 font-semibold">{p.authors?.join(', ')}</span>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${p.isActive ? 'bg-green-150 text-green-700' : 'bg-red-150 text-red-700'}`}>
-                          {p.isActive ? 'Active' : 'Draft'}
-                        </span>
-                      </div>
-                      <h3 className="text-sm font-bold text-brand-deepBlue dark:text-white">{p.title}</h3>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => editResearch(p)}
-                        className="p-1.5 rounded-lg border border-slate-200 dark:border-brand-darkBorder text-slate-500 hover:text-brand-glowCyan"
-                      >
-                        <Edit className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => deleteResearch(p.id)}
-                        className="p-1.5 rounded-lg border border-slate-200 dark:border-brand-darkBorder text-slate-550 hover:text-red-500"
-                      >
-                        <Trash className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Research form overlay */}
-              {isResearchModalOpen && (
-                <div className="fixed inset-0 bg-slate-950/60 z-50 flex items-center justify-center p-4 overflow-y-auto">
-                  <div className="w-full max-w-2xl bg-white dark:bg-brand-darkCard rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-                    <button onClick={() => setIsResearchModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                      <X className="w-5 h-5" />
+              {isResearchModalOpen ? (
+                <div className="bg-white dark:bg-brand-darkCard rounded-3xl p-6 sm:p-8 space-y-6 border border-slate-200 dark:border-brand-darkBorder shadow-sm">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-brand-darkBorder pb-4">
+                    <button
+                      type="button"
+                      onClick={() => setIsResearchModalOpen(false)}
+                      className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-brand-glowCyan"
+                    >
+                      <ArrowLeft className="w-4 h-4" /> Back to Research Publications
                     </button>
-                    <h2 className="text-lg font-bold text-brand-deepBlue dark:text-white">
-                      {researchForm.id ? 'Edit Research publication' : 'Publish Research Document'}
+                    <h2 className="text-base font-extrabold text-brand-deepBlue dark:text-white">
+                      {researchForm.id ? 'Edit Research Publication' : 'Publish Research Document'}
                     </h2>
+                  </div>
 
-                    <form onSubmit={handleResearchSubmit} className="space-y-4 text-xs font-semibold">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="adm-r-title" className="block text-[11px] text-slate-450 uppercase mb-1">Document Title</label>
-                          <input
-                            id="adm-r-title"
-                            type="text" required
-                            value={researchForm.title}
-                            onChange={e => setResearchForm({...researchForm, title: e.target.value})}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="adm-r-authors" className="block text-[11px] text-slate-450 uppercase mb-1">Authors (Comma separated)</label>
-                          <input
-                            id="adm-r-authors"
-                            type="text" required
-                            value={researchForm.authors}
-                            onChange={e => setResearchForm({...researchForm, authors: e.target.value})}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                          <label htmlFor="adm-r-cat" className="block text-[11px] text-slate-450 uppercase mb-1">Category</label>
-                          <select
-                            id="adm-r-cat"
-                            value={researchForm.category}
-                            onChange={e => setResearchForm({...researchForm, category: e.target.value})}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder text-slate-700 dark:text-slate-350 focus:outline-none"
-                          >
-                            <option>Digital Forensics</option>
-                            <option>Biometrics</option>
-                            <option>General Forensic</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label htmlFor="adm-r-read" className="block text-[11px] text-slate-450 uppercase mb-1">Read Time (Mins)</label>
-                          <input
-                            id="adm-r-read"
-                            type="number" required
-                            value={researchForm.readTimeMinutes}
-                            onChange={e => setResearchForm({...researchForm, readTimeMinutes: parseInt(e.target.value) || 8})}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="adm-r-cite" className="block text-[11px] text-slate-450 uppercase mb-1">Citation Format (APA/MLA)</label>
-                          <input
-                            id="adm-r-cite"
-                            type="text" required
-                            value={researchForm.citation}
-                            onChange={e => setResearchForm({...researchForm, citation: e.target.value})}
-                            className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
+                  <form onSubmit={handleResearchSubmit} className="space-y-4 text-xs font-semibold">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="adm-r-abs" className="block text-[11px] text-slate-450 uppercase mb-1">Abstract Summary</label>
-                        <textarea
-                          id="adm-r-abs"
-                          required rows={3}
-                          value={researchForm.abstract}
-                          onChange={e => setResearchForm({...researchForm, abstract: e.target.value})}
-                          className="w-full p-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
-                        ></textarea>
-                      </div>
-
-                      <div>
-                        <label htmlFor="adm-r-cont" className="block text-[11px] text-slate-450 uppercase mb-1">Main Paper Content</label>
-                        <textarea
-                          id="adm-r-cont"
-                          required rows={6}
-                          value={researchForm.content}
-                          onChange={e => setResearchForm({...researchForm, content: e.target.value})}
-                          className="w-full p-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none font-mono text-[11px]"
-                        ></textarea>
-                      </div>
-
-                      <div className="flex items-center gap-2">
+                        <label htmlFor="adm-r-title" className="block text-[11px] text-slate-450 uppercase mb-1">Document Title</label>
                         <input
-                          id="adm-r-act"
-                          type="checkbox"
-                          checked={researchForm.isActive}
-                          onChange={e => setResearchForm({...researchForm, isActive: e.target.checked})}
-                          className="w-4 h-4 rounded text-brand-glowCyan border-slate-300"
+                          id="adm-r-title"
+                          type="text" required
+                          value={researchForm.title}
+                          onChange={e => setResearchForm({...researchForm, title: e.target.value})}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
                         />
-                        <label htmlFor="adm-r-act" className="text-xs font-bold text-slate-700 dark:text-slate-300">Set active & publish document</label>
                       </div>
+                      <div>
+                        <label htmlFor="adm-r-authors" className="block text-[11px] text-slate-450 uppercase mb-1">Authors (Comma separated)</label>
+                        <input
+                          id="adm-r-authors"
+                          type="text" required
+                          value={researchForm.authors}
+                          onChange={e => setResearchForm({...researchForm, authors: e.target.value})}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
+                        />
+                      </div>
+                    </div>
 
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label htmlFor="adm-r-cat" className="block text-[11px] text-slate-450 uppercase mb-1">Category</label>
+                        <select
+                          id="adm-r-cat"
+                          value={researchForm.category}
+                          onChange={e => setResearchForm({...researchForm, category: e.target.value})}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder text-slate-700 dark:text-slate-350 focus:outline-none"
+                        >
+                          <option>Digital Forensics</option>
+                          <option>Biometrics</option>
+                          <option>General Forensic</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="adm-r-read" className="block text-[11px] text-slate-450 uppercase mb-1">Read Time (Mins)</label>
+                        <input
+                          id="adm-r-read"
+                          type="number" required
+                          value={researchForm.readTimeMinutes}
+                          onChange={e => setResearchForm({...researchForm, readTimeMinutes: parseInt(e.target.value) || 8})}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="adm-r-cite" className="block text-[11px] text-slate-450 uppercase mb-1">Citation Format (APA/MLA)</label>
+                        <input
+                          id="adm-r-cite"
+                          type="text" required
+                          value={researchForm.citation}
+                          onChange={e => setResearchForm({...researchForm, citation: e.target.value})}
+                          className="w-full h-9 px-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="adm-r-abs" className="block text-[11px] text-slate-450 uppercase mb-1">Abstract Summary</label>
+                      <textarea
+                        id="adm-r-abs"
+                        required rows={3}
+                        value={researchForm.abstract}
+                        onChange={e => setResearchForm({...researchForm, abstract: e.target.value})}
+                        className="w-full p-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none"
+                      ></textarea>
+                    </div>
+
+                    <div>
+                      <label htmlFor="adm-r-cont" className="block text-[11px] text-slate-450 uppercase mb-1">Main Paper Content</label>
+                      <textarea
+                        id="adm-r-cont"
+                        required rows={6}
+                        value={researchForm.content}
+                        onChange={e => setResearchForm({...researchForm, content: e.target.value})}
+                        className="w-full p-3 rounded-lg bg-slate-50 dark:bg-brand-darkBg border border-slate-200 dark:border-brand-darkBorder focus:outline-none font-mono text-[11px]"
+                      ></textarea>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="adm-r-act"
+                        type="checkbox"
+                        checked={researchForm.isActive}
+                        onChange={e => setResearchForm({...researchForm, isActive: e.target.checked})}
+                        className="w-4 h-4 rounded text-brand-glowCyan border-slate-300"
+                      />
+                      <label htmlFor="adm-r-act" className="text-xs font-bold text-slate-700 dark:text-slate-300">Set active & publish document</label>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button type="button" onClick={() => setIsResearchModalOpen(false)} className="px-4 py-2 rounded-lg text-xs font-bold text-slate-500 border border-slate-200 dark:border-brand-darkBorder">
+                        Cancel
+                      </button>
                       <button
                         type="submit"
-                        className="w-full py-2.5 rounded-lg bg-brand-deepBlue dark:bg-brand-glowBlue hover:bg-brand-glowCyan text-white text-xs font-bold transition-colors"
+                        className="px-5 py-2.5 rounded-lg bg-brand-deepBlue dark:bg-brand-glowBlue hover:bg-brand-glowCyan text-white text-xs font-bold transition-colors"
                       >
                         Publish Research details
                       </button>
-                    </form>
-                  </div>
+                    </div>
+                  </form>
                 </div>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center gap-4">
+                    <h2 className="text-sm font-extrabold uppercase text-slate-400">Research Journal Database</h2>
+                    <button
+                      onClick={() => {
+                        setResearchForm({ id: '', title: '', abstract: '', content: '', category: 'Digital Forensics', authors: '', readTimeMinutes: 8, citation: '', isActive: true });
+                        setIsResearchModalOpen(true);
+                      }}
+                      className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-900 bg-brand-glowCyan hover:bg-brand-glowBlue hover:text-white rounded-lg transition-colors"
+                    >
+                      <Plus className="w-4 h-4" /> Publish Research
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {research.map(p => (
+                      <div key={p.id} className="p-6 rounded-2xl bg-white dark:bg-brand-darkCard border border-slate-200 dark:border-brand-darkBorder flex items-center justify-between gap-6">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-deepBlue/5 dark:bg-brand-glowCyan/10 text-brand-deepBlue dark:text-brand-glowCyan">
+                              {p.category}
+                            </span>
+                            <span className="text-[11px] text-slate-400 font-semibold">{p.authors?.join(', ')}</span>
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${p.isActive ? 'bg-green-150 text-green-700' : 'bg-red-150 text-red-700'}`}>
+                              {p.isActive ? 'Active' : 'Draft'}
+                            </span>
+                          </div>
+                          <h3 className="text-sm font-bold text-brand-deepBlue dark:text-white">{p.title}</h3>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => editResearch(p)}
+                            className="p-1.5 rounded-lg border border-slate-200 dark:border-brand-darkBorder text-slate-500 hover:text-brand-glowCyan"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => deleteResearch(p.id)}
+                            className="p-1.5 rounded-lg border border-slate-200 dark:border-brand-darkBorder text-slate-550 hover:text-red-500"
+                          >
+                            <Trash className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           )}

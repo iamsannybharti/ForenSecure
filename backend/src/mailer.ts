@@ -84,6 +84,25 @@ export function resetTemplate(name: string, url: string): MailTemplate {
   };
 }
 
+/** One-time code email. No link and no CTA — the code is the whole message, so
+ *  it is rendered big enough to read off a phone without zooming. */
+export function otpTemplate(name: string, code: string, purpose: 'signin' | 'signup'): MailTemplate {
+  const action = purpose === 'signup' ? 'finish creating your ForenSecure account' : 'sign in to ForenSecure';
+  return {
+    subject: `${code} is your ForenSecure verification code`,
+    text: `Hi ${name},\n\nYour verification code is ${code}.\n\nEnter it to ${action}. It expires in 10 minutes.\n\nIf you didn't request it, ignore this email and your password stays safe.`,
+    html: `
+<div style="font-family:Inter,Arial,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#0a0e1c">
+  <h1 style="font-size:20px;margin:0 0 16px">Your verification code</h1>
+  <p style="font-size:14px;line-height:1.6;color:#4c5468;margin:0 0 24px">Hi ${name}, enter this code to ${action}.</p>
+  <p style="font-size:32px;font-weight:700;letter-spacing:10px;background:#f2f5f9;border-radius:12px;padding:16px 24px;margin:0;text-align:center">${code}</p>
+  <p style="font-size:12px;line-height:1.6;color:#8891a3;margin:24px 0 0">
+    This code expires in 10 minutes. If you weren't expecting it you can ignore this email.
+  </p>
+</div>`
+  };
+}
+
 let transporter: Transporter | null = null;
 
 function getTransporter(config: MailerConfig): Transporter | null {
