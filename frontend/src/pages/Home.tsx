@@ -120,9 +120,9 @@ export default function Home() {
 
             {/* Branding Header */}
             <div className="flex items-center gap-3 pt-1">
-              <LogoMark className="w-10 h-10 text-[#00f0ff] shrink-0 drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]" />
+              <LogoMark className="w-14 h-14 text-[#00f0ff] shrink-0 drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]" />
               <div>
-                <span className="text-2xl font-black tracking-tight text-white heading-display block" style={{ color: '#ffffff' }}>
+                <span className="text-3xl font-black tracking-tight text-white heading-display block" style={{ color: '#ffffff' }}>
                   Foren<span className="text-[#00f0ff]" style={{ color: '#00f0ff' }}>Secure</span>
                 </span>
                 <span className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-[#00f0ff] block" style={{ color: '#00f0ff' }}>
